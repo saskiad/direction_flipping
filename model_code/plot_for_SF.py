@@ -1,57 +1,79 @@
 import numpy as np
 from matplotlib import pyplot as plt
+import matplotlib.pylab as pylab
+
+params = {'legend.fontsize': 21,
+          'axes.labelsize':  21,
+          'axes.titlesize':  21,
+          'xtick.labelsize': 21,
+          'ytick.labelsize': 21}
+
+pylab.rcParams.update(params)
 
 sustained_cell = 'ON'
 stimulus = 'grating'
 
 
 f = 2.
-k_all = np.arange(0.005, 1.25, 0.005)
-delt = 5
+k_all = np.arange(0.005, 0.8, 0.005)
+delt = 5.
 DSI = np.zeros(len(k_all))
+
+tstep = 0.001
+time = np.arange(0, 10.0, tstep)  # 3.65
+tau_transient = 0.03
+tau_sustained = 0.15
+
 for i, k in enumerate(k_all):
     rates = np.zeros(2)
     for j, degree in enumerate([0., 180.]):
         theta = degree * (np.pi/180) #np.pi/2
         delta = delt * np.cos(theta)
 
-        tstep = 0.001
-        time = np.arange(0, 1.0, tstep)# 3.65
-
         x1 = 0.  #np.arange(0,500)
         y1 = np.cos(k*x1 + 2*np.pi*f*time)
 
 
-        x2 = x1 + delta  #np.arange(0,500)
+        x2 = (x1 + delta)*2.*np.pi  #np.arange(0,500)
         y2 = np.cos(k*x2 + 2*np.pi*f*time)
 
-        if stimulus == 'bar':
-            time = np.arange(0, 5, tstep)
-            x1 = 2.4
-            x2 = 2.4 + 0.9 * np.cos(theta)
-            y1 = -np.exp(-(time - x1)**2 / 0.2**2)
-            y2 = -np.exp(-(time - x2)**2 / 0.2**2)
-
-        t = np.arange(0, 300)
-        tau_sustained = 150.
-        tau_transient = 30.
+        # t = np.arange(0, 20. * tau_sustained, tstep)
+        filter_total_time = 2.0
 
         if sustained_cell == 'OFF':
-            filter1 = -(t / tau_sustained) * (np.exp(-t / tau_sustained))
+            # filter1 = -(t / tau_sustained) * (np.exp(-t / tau_sustained))
+            filter1 = np.zeros(int(filter_total_time / tstep))
+            filter1[:int(tau_sustained / tstep)] = -1.0
         elif sustained_cell == 'ON':
-            filter1 = (t / tau_sustained) * (np.exp(-t / tau_sustained))
+            # filter1 = (t / tau_sustained) * (np.exp(-t / tau_sustained))
+            filter1 = np.zeros(int(filter_total_time / tstep))
+            filter1[:int(tau_sustained / tstep)] = 1.0
 
-        filter2 = -(t / tau_transient) * (np.exp(-t / tau_transient))
+        # filter2 = -(t / tau_transient) * (np.exp(-t / tau_transient))
+        filter2 = np.zeros(int(filter_total_time / tstep))
+        filter2[:int(tau_transient / tstep)] = -1.0
 
         convolved1 = np.convolve(filter1, y1, 'valid')
         convolved2 = np.convolve(filter2, y2, 'valid')
+        convolved1 /= np.max(convolved1)
+        convolved2 /= np.max(convolved2)
         # convolved1[convolved1 < 0] = 0
         # convolved2[convolved2 < 0] = 0
 
+        # smaller_length = np.min([convolved1.shape[0], convolved2.shape[0]])
+        # rates[j] = np.max(convolved2[:smaller_length] + convolved1[:smaller_length])
         rates[j] = np.max(convolved2 + convolved1)
     DSI[i] = (rates[0] - rates[1]) / (rates[1] + rates[0])
 
+
 plt.figure()
+plt.plot(convolved1)
+plt.plot(convolved2)
+plt.figure()
+plt.plot(filter1)
+plt.figure()
+plt.plot(filter2)
+plt.figure(figsize=(8,8))
 plt.plot(k_all, DSI, c = 'royalblue')
 plt.plot([np.min(k_all), np.max(k_all)], [0, 0], 'k')
 plt.ylabel('DSI (unitless)')
@@ -61,11 +83,9 @@ plt.savefig('SF_DSI.png')
 
 
 # k_all = np.arange(0.005, 0.6, 0.005)
-tau_S = np.arange(30., 231, 1)
+tau_S = np.arange(0.03, 0.231, 0.001)
 DSI = np.zeros((len(k_all), len(tau_S)))
 
-tstep = 0.001
-time = np.arange(0, 1.0, tstep)  # 3.65
 
 for i, k in enumerate(k_all):
     for j, tau_sustained in enumerate(tau_S):
@@ -76,40 +96,43 @@ for i, k in enumerate(k_all):
             x1 = 0.  #np.arange(0,500)
             y1 = np.cos(k*x1 + 2*np.pi*f*time)
 
-            x2 = x1 + delta  #np.arange(0,500)
+            x2 = (x1 + delta)*2.*np.pi   #np.arange(0,500)
             y2 = np.cos(k*x2 + 2*np.pi*f*time)
 
-            if stimulus == 'bar':
-                time = np.arange(0, 5, tstep)
-                x1 = 2.4
-                x2 = 2.4 + 0.9 * np.cos(theta)
-                y1 = -np.exp(-(time - x1)**2 / 0.2**2)
-                y2 = -np.exp(-(time - x2)**2 / 0.2**2)
-
-            t = np.arange(0, 300)
-            tau_transient = 30.
+            # t = np.arange(0, 20.0 * tau_sustained, tstep)
+            filter_total_time = 2.0
 
             if sustained_cell == 'OFF':
-                filter1 = -(t / tau_sustained) * (np.exp(-t / tau_sustained))
+                # filter1 = -(t / tau_sustained) * (np.exp(-t / tau_sustained))
+                filter1 = np.zeros(int(filter_total_time / tstep))
+                filter1[:int(tau_sustained / tstep)] = -1.0
             elif sustained_cell == 'ON':
-                filter1 = (t / tau_sustained) * (np.exp(-t / tau_sustained))
+                # filter1 = (t / tau_sustained) * (np.exp(-t / tau_sustained))
+                filter1 = np.zeros(int(filter_total_time / tstep))
+                filter1[:int(tau_sustained / tstep)] = 1.0
 
-            filter2 = -(t / tau_transient) * (np.exp(-t / tau_transient))
+            # filter2 = -(t / tau_transient) * (np.exp(-t / tau_transient))
+            filter2 = np.zeros(int(filter_total_time / tstep))
+            filter2[:int(tau_transient / tstep)] = -1.0
 
             convolved1 = np.convolve(filter1, y1, 'valid')
             convolved2 = np.convolve(filter2, y2, 'valid')
+            convolved1 /= np.max(convolved1)
+            convolved2 /= np.max(convolved2)
 
             # convolved1[convolved1 < 0] = 0
             # convolved2[convolved2 < 0] = 0
 
+            # smaller_length = np.min([convolved1.shape[0], convolved2.shape[0]])
+            # rates[z] = np.max(convolved2[:smaller_length] + convolved1[:smaller_length])
             rates[z] = np.max(convolved2 + convolved1)
         DSI[i, len(tau_S) - j - 1] = (rates[0] - rates[1]) / (rates[0] + rates[1])
 
-plt.figure()
+plt.figure(figsize=(8,8))
 plt.imshow(np.transpose(DSI),
            interpolation=None,
            cmap='seismic',
-           extent=[min(k_all), max(k_all), min(tau_S) - tau_transient, max(tau_S) - tau_transient],
+           extent=[min(k_all), max(k_all), 1000*(min(tau_S) - tau_transient), 1000*(max(tau_S) - tau_transient)],
            aspect = 'auto')
 plt.ylabel('Delta Tau (milliseconds)')
 plt.xlabel('SF (cpd)')
