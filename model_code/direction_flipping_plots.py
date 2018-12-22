@@ -13,7 +13,7 @@ pylab.rcParams.update(params)
 
 
 def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.03,
-               sustained_type='ON', transient_type = 'OFF', tstep = 0.001, total_time = 10.0):
+               sustained_type='ON', transient_type = 'OFF', tstep = 0.001, total_time = 10.0, save_flag = False):
     '''
 
     :param parameter: filter parameter to sweep: TF, SF, or d
@@ -30,13 +30,13 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
 
     if parameter =='TF':
         xlabel = 'TF (Hz)'
-        save_name = 'Distance_DSI.png'
+        save_name = 'TF_DSI.png'
     elif parameter == 'SF':
         xlabel = 'SF (CPD)'
         save_name = 'SF_DSI.png'
     elif parameter == 'd':
         xlabel = 'Filter Separation (Degrees)'
-        save_name = 'TF_DSI.png'
+        save_name = 'Distance_DSI.png'
     else:
         print "Invalid parameter given. Please choose 'd', 'SF', or 'TF'."
         return
@@ -99,6 +99,14 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
             convolved2 = np.convolve(transient_filter, y2, 'valid')
             convolved1 /= np.max(convolved1)
             convolved2 /= np.max(convolved2)
+            plt.figure()
+            time_plot = np.arange(0, 2, tstep)
+            plt.plot(time_plot,convolved1[:len(time_plot)], label = 'Sustained')
+            plt.plot(time_plot,convolved2[:len(time_plot)], label = 'Transient')
+            plt.legend()
+            plt.title('k = ' + str(k) + ' for ' + str(degree))
+            plt.savefig('k = ' + str(int(k*100)) + ' for ' + str(int(degree)))
+            # plt.show()
 
             rates[j] = np.max(convolved2 + convolved1)
 
@@ -109,23 +117,24 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
     plt.plot([np.min(param_range), np.max(param_range)], [0, 0], 'k')
     plt.ylabel('DSI (unitless)')
     plt.xlabel(xlabel)
-    plt.savefig(save_name)
+    if save_flag:
+        plt.savefig(save_name)
 
     return
 
 
 def plot_heatmap(parameter, param_range, tau_sustained_range = np.arange(0.03, 0.231, 0.001), tau_transient = 0.03,
-                                        sustained_type='ON', transient_type = 'OFF', tstep = 0.001, total_time = 10.0):
+                 sustained_type='ON', transient_type = 'OFF', tstep = 0.001, total_time = 10.0, save_flag = False):
 
     if parameter =='TF':
         xlabel = 'TF (Hz)'
-        save_name = 'Distance_DSI.png'
+        save_name = 'TF_heatmap.png'
     elif parameter == 'SF':
         xlabel = 'SF (CPD)'
-        save_name = 'SF_DSI.png'
+        save_name = 'SF_heatmap.png'
     elif parameter == 'd':
         xlabel = 'Filter Separation (Degrees)'
-        save_name = 'TF_DSI.png'
+        save_name = 'Distance_heatmap.png'
     else:
         print "Invalid parameter given. Please choose 'd', 'SF', or 'TF'."
         return
@@ -205,7 +214,13 @@ def plot_heatmap(parameter, param_range, tau_sustained_range = np.arange(0.03, 0
     plt.ylabel('Delta Tau (milliseconds)')
     plt.xlabel(xlabel)
     plt.colorbar()
-    plt.savefig(save_name)
+    plt.plot([np.min(param_range), np.max(param_range)], [120, 120], c = 'k')
+    plt.grid(alpha = 0.5)
+    # plt.rc('xtick', labelsize=8)
+    # plt.rc('ytick', labelsize=8)
+
+    if save_flag:
+        plt.savefig(save_name)
 
     plt.show()
 
@@ -239,19 +254,19 @@ if __name__ == "__main__":
     plot_filters()
 
     ####### Plots for TF
-    f_range = np.arange(1., 30., 0.1)
-    plot_slice('TF', f_range)
-    plot_heatmap('TF', f_range)
-
-    ####### Plots for SF
+    # f_range = np.arange(1., 30., 0.1)
+    # plot_slice('TF', f_range, save_flag = False)
+    # plot_heatmap('TF', f_range, save_flag = False)
+    #
+    # ####### Plots for SF
     k_range = np.arange(0.005, 0.8, 0.005)
-    plot_slice('SF', k_range)
-    plot_heatmap('SF', k_range)
+    plot_slice('SF', [0.025, 0.1, 0.175], save_flag = False)
+    # plot_heatmap('SF', k_range, save_flag = False)
 
     ####### Plots for filter separation
-    d_range = np.arange(0., 80., 1)
-    plot_slice('d', d_range)
-    plot_heatmap('d', d_range)
+    # d_range = np.arange(0., 80., 1)
+    # plot_slice('d', [0, 3, 12.5, 22, 25], save_flag = False)
+    # plot_heatmap('d', d_range, save_flag = False)
 
     plt.show()
 
