@@ -11,6 +11,17 @@ params = {'legend.fontsize': 21,
 pylab.rcParams.update(params)
 
 
+def calculate_DSI():
+    '''
+    This function calculated the DSI to remove the double use of code in
+    the two functions below of plot_slice and plot_heatmap. Will need
+    to take in the taus, types, parameters, timestep and total
+    time.
+    Need to acocunt for filter types
+    to solve every combination ON/ON, ON/OFF, OFF/OFF, OFF/ON
+    :return:
+    '''
+    pass
 
 def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.03,
                sustained_type='ON', transient_type = 'OFF', tstep = 0.001, total_time = 10.0, save_flag = False):
