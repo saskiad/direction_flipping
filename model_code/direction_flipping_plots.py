@@ -21,7 +21,40 @@ def calculate_DSI():
     to solve every combination ON/ON, ON/OFF, OFF/OFF, OFF/ON
     :return:
     '''
-    pass
+    rates = np.zeros(2)
+    for j, degree in enumerate([0., 180.]):
+        theta = degree * (np.pi / 180)  # np.pi/2
+        delta = delt * np.cos(theta)
+
+        x1 = 0.
+        y1 = np.cos(k * x1 + 2 * np.pi * f * time)
+
+        x2 = (x1 + delta) * (2 * np.pi)
+        y2 = np.cos(k * x2 + 2 * np.pi * f * time)
+
+        sustained_filter = np.zeros(int(filter_total_time / tstep))
+        sustained_filter[:int(tau_sustained / tstep)] = scale_ratio_sustained
+
+        transient_filter = np.zeros(int(filter_total_time / tstep))
+        transient_filter[:int(tau_transient / tstep)] = scale_ratio_transient
+
+        convolved1 = np.convolve(sustained_filter, y1, 'valid')
+        convolved2 = np.convolve(transient_filter, y2, 'valid')
+        convolved1 /= np.max(convolved1)
+        convolved2 /= np.max(convolved2)
+        plt.figure()
+        time_plot = np.arange(0, 2, tstep)
+        plt.plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
+        plt.plot(time_plot, convolved2[:len(time_plot)], label='Transient')
+        plt.legend()
+        plt.title('k = ' + str(k) + ' for ' + str(degree))
+        plt.savefig('k = ' + str(int(k * 100)) + ' for ' + str(int(degree)))
+        # plt.show()
+
+        rates[j] = np.max(convolved2 + convolved1)
+
+    # Return DSI
+    return (rates[0] - rates[1]) / (rates[1] + rates[0])
 
 def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.03,
                sustained_type='ON', transient_type = 'OFF', tstep = 0.001, total_time = 10.0, save_flag = False):
