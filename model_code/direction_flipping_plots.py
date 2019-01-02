@@ -11,7 +11,9 @@ params = {'legend.fontsize': 21,
 pylab.rcParams.update(params)
 
 
-def calculate_DSI():
+def calculate_DSI(f, k, delt,
+                  total_time, tstep,
+                  sustained_type, transient_type, tau_sustained, tau_transient):
     '''
     This function calculated the DSI to remove the double use of code in
     the two functions below of plot_slice and plot_heatmap. Will need
@@ -21,6 +23,26 @@ def calculate_DSI():
     to solve every combination ON/ON, ON/OFF, OFF/OFF, OFF/ON
     :return:
     '''
+
+    if transient_type == 'ON':
+        scale_ratio_transient = 1.0
+    elif transient_type == 'OFF':
+        scale_ratio_transient = -1.0
+    else:
+        print "transient filter can only be ON or OFF - can't plot filter"
+        return
+
+    if sustained_type == 'ON':
+        scale_ratio_sustained = 1.0
+    elif sustained_type == 'OFF':
+        scale_ratio_sustained = -1.0
+    else:
+        print "transient filter can only be ON or OFF - can't plot filter"
+        return
+
+    time = np.arange(0, total_time, tstep)  # Time array
+    filter_total_time = 2. * tau_sustained  # Since square-wave, need filter to go to zero
+
     rates = np.zeros(2)
     for j, degree in enumerate([0., 180.]):
         theta = degree * (np.pi / 180)  # np.pi/2
@@ -42,13 +64,13 @@ def calculate_DSI():
         convolved2 = np.convolve(transient_filter, y2, 'valid')
         convolved1 /= np.max(convolved1)
         convolved2 /= np.max(convolved2)
-        plt.figure()
-        time_plot = np.arange(0, 2, tstep)
-        plt.plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
-        plt.plot(time_plot, convolved2[:len(time_plot)], label='Transient')
-        plt.legend()
-        plt.title('k = ' + str(k) + ' for ' + str(degree))
-        plt.savefig('k = ' + str(int(k * 100)) + ' for ' + str(int(degree)))
+        # plt.figure()
+        # time_plot = np.arange(0, 2, tstep)
+        # plt.plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
+        # plt.plot(time_plot, convolved2[:len(time_plot)], label='Transient')
+        # plt.legend()
+        # plt.title('k = ' + str(k) + ' for ' + str(degree))
+        # plt.savefig('k = ' + str(int(k * 100)) + ' for ' + str(int(degree)))
         # plt.show()
 
         rates[j] = np.max(convolved2 + convolved1)
@@ -74,13 +96,13 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
 
     if parameter =='TF':
         xlabel = 'TF (Hz)'
-        save_name = 'TF_DSI.png'
+        save_name = 's' + sustained_type + 't' + transient_type + '_TF_slice.png'
     elif parameter == 'SF':
         xlabel = 'SF (CPD)'
-        save_name = 'SF_DSI.png'
+        save_name = 's' + sustained_type + 't' + transient_type + '_SF_slice.png'
     elif parameter == 'd':
         xlabel = 'Filter Separation (Degrees)'
-        save_name = 'Distance_DSI.png'
+        save_name = 's' + sustained_type + 't' + transient_type + '_Distance_slice.png'
     else:
         print "Invalid parameter given. Please choose 'd', 'SF', or 'TF'."
         return
@@ -122,45 +144,52 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
         else:
             delt = p
 
-        rates = np.zeros(2)
-        for j, degree in enumerate([0., 180.]):
-            theta = degree * (np.pi/180) #np.pi/2
-            delta = delt * np.cos(theta)
+        # rates = np.zeros(2)
 
-            x1 = 0.
-            y1 = np.cos(k*x1 + 2*np.pi*f*time)
+        DSI[i] = calculate_DSI(f, k, delt,
+                      total_time, tstep,
+                      sustained_type, transient_type,
+                      tau_sustained, tau_transient)
 
-            x2 = (x1 + delta)*(2*np.pi)
-            y2 = np.cos(k*x2 + 2*np.pi*f*time)
-
-            sustained_filter = np.zeros(int(filter_total_time/tstep))
-            sustained_filter[:int(tau_sustained/tstep)] = scale_ratio_sustained
-
-            transient_filter = np.zeros(int(filter_total_time / tstep))
-            transient_filter[:int(tau_transient/tstep)] = scale_ratio_transient
-
-            convolved1 = np.convolve(sustained_filter, y1, 'valid')
-            convolved2 = np.convolve(transient_filter, y2, 'valid')
-            convolved1 /= np.max(convolved1)
-            convolved2 /= np.max(convolved2)
-            plt.figure()
-            time_plot = np.arange(0, 2, tstep)
-            plt.plot(time_plot,convolved1[:len(time_plot)], label = 'Sustained')
-            plt.plot(time_plot,convolved2[:len(time_plot)], label = 'Transient')
-            plt.legend()
-            plt.title('k = ' + str(k) + ' for ' + str(degree))
-            plt.savefig('k = ' + str(int(k*100)) + ' for ' + str(int(degree)))
-            # plt.show()
-
-            rates[j] = np.max(convolved2 + convolved1)
-
-        DSI[i] = (rates[0] - rates[1]) / (rates[1] + rates[0])
+        # for j, degree in enumerate([0., 180.]):
+        #     theta = degree * (np.pi/180) #np.pi/2
+        #     delta = delt * np.cos(theta)
+        #
+        #     x1 = 0.
+        #     y1 = np.cos(k*x1 + 2*np.pi*f*time)
+        #
+        #     x2 = (x1 + delta)*(2*np.pi)
+        #     y2 = np.cos(k*x2 + 2*np.pi*f*time)
+        #
+        #     sustained_filter = np.zeros(int(filter_total_time/tstep))
+        #     sustained_filter[:int(tau_sustained/tstep)] = scale_ratio_sustained
+        #
+        #     transient_filter = np.zeros(int(filter_total_time / tstep))
+        #     transient_filter[:int(tau_transient/tstep)] = scale_ratio_transient
+        #
+        #     convolved1 = np.convolve(sustained_filter, y1, 'valid')
+        #     convolved2 = np.convolve(transient_filter, y2, 'valid')
+        #     convolved1 /= np.max(convolved1)
+        #     convolved2 /= np.max(convolved2)
+        #     # plt.figure()
+        #     # time_plot = np.arange(0, 2, tstep)
+        #     # plt.plot(time_plot,convolved1[:len(time_plot)], label = 'Sustained')
+        #     # plt.plot(time_plot,convolved2[:len(time_plot)], label = 'Transient')
+        #     # plt.legend()
+        #     # plt.title('k = ' + str(k) + ' for ' + str(degree))
+        #     # plt.savefig('k = ' + str(int(k*100)) + ' for ' + str(int(degree)))
+        #     # plt.show()
+        #
+        #     rates[j] = np.max(convolved2 + convolved1)
+        #
+        # DSI[i] = (rates[0] - rates[1]) / (rates[1] + rates[0])
 
     plt.figure(figsize=(8,8))
     plt.plot(param_range, DSI, c = 'royalblue')
     plt.plot([np.min(param_range), np.max(param_range)], [0, 0], 'k')
     plt.ylabel('DSI (unitless)')
     plt.xlabel(xlabel)
+    plt.title('s' + sustained_type + 't' + transient_type)
     if save_flag:
         plt.savefig(save_name)
 
@@ -172,13 +201,13 @@ def plot_heatmap(parameter, param_range, tau_sustained_range = np.arange(0.03, 0
 
     if parameter =='TF':
         xlabel = 'TF (Hz)'
-        save_name = 'TF_heatmap.png'
+        save_name = 's' + sustained_type + 't' + transient_type + '_TF_heatmap.png'
     elif parameter == 'SF':
         xlabel = 'SF (CPD)'
-        save_name = 'SF_heatmap.png'
+        save_name = 's' + sustained_type + 't' + transient_type + '_SF_heatmap.png'
     elif parameter == 'd':
         xlabel = 'Filter Separation (Degrees)'
-        save_name = 'Distance_heatmap.png'
+        save_name = 's' + sustained_type + 't' + transient_type + '_Distance_heatmap.png'
     else:
         print "Invalid parameter given. Please choose 'd', 'SF', or 'TF'."
         return
@@ -222,28 +251,32 @@ def plot_heatmap(parameter, param_range, tau_sustained_range = np.arange(0.03, 0
 
         for j, tau_sustained in enumerate(tau_sustained_range):
             rates = np.zeros(2)
-            for z, degree in enumerate([0., 180.]):
-                theta = degree * (np.pi / 180)
-                delta = delt * np.cos(theta)
-                x1 = 0.
-                y1 = np.cos(k*x1 + 2*np.pi*f*time)
-
-                x2 = (x1 + delta)*2.*np.pi
-                y2 = np.cos(k*x2 + 2*np.pi*f*time)
-
-                sustained_filter = np.zeros(int(filter_total_time / tstep))
-                sustained_filter[:int(tau_sustained / tstep)] = scale_ratio_sustained
-
-                transient_filter = np.zeros(int(filter_total_time / tstep))
-                transient_filter[:int(tau_transient / tstep)] = scale_ratio_transient
-
-                convolved1 = np.convolve(sustained_filter, y1, 'valid')
-                convolved2 = np.convolve(transient_filter, y2, 'valid')
-                convolved1 /= np.max(convolved1)
-                convolved2 /= np.max(convolved2)
-
-                rates[z] = np.max(convolved2+ convolved1)
-            DSI[i, len(tau_sustained_range) - j - 1] = (rates[0] - rates[1]) / (rates[0] + rates[1])
+            DSI[i, len(tau_sustained_range) - j - 1] = calculate_DSI(f, k, delt,
+                                                                     total_time, tstep,
+                                                                     sustained_type, transient_type,
+                                                                     tau_sustained, tau_transient)
+            # for z, degree in enumerate([0., 180.]):
+            #     theta = degree * (np.pi / 180)
+            #     delta = delt * np.cos(theta)
+            #     x1 = 0.
+            #     y1 = np.cos(k*x1 + 2*np.pi*f*time)
+            #
+            #     x2 = (x1 + delta)*2.*np.pi
+            #     y2 = np.cos(k*x2 + 2*np.pi*f*time)
+            #
+            #     sustained_filter = np.zeros(int(filter_total_time / tstep))
+            #     sustained_filter[:int(tau_sustained / tstep)] = scale_ratio_sustained
+            #
+            #     transient_filter = np.zeros(int(filter_total_time / tstep))
+            #     transient_filter[:int(tau_transient / tstep)] = scale_ratio_transient
+            #
+            #     convolved1 = np.convolve(sustained_filter, y1, 'valid')
+            #     convolved2 = np.convolve(transient_filter, y2, 'valid')
+            #     convolved1 /= np.max(convolved1)
+            #     convolved2 /= np.max(convolved2)
+            #
+            #     rates[z] = np.max(convolved2+ convolved1)
+            # DSI[i, len(tau_sustained_range) - j - 1] = (rates[0] - rates[1]) / (rates[0] + rates[1])
 
     plt.figure(figsize=(8,8))
     plt.imshow(np.transpose(DSI),
@@ -257,6 +290,7 @@ def plot_heatmap(parameter, param_range, tau_sustained_range = np.arange(0.03, 0
     np.save('TF_heatmap.npy', np.transpose(DSI))
     plt.ylabel('Delta Tau (milliseconds)')
     plt.xlabel(xlabel)
+    plt.title('s' + sustained_type + 't' + transient_type)
     plt.colorbar()
     plt.plot([np.min(param_range), np.max(param_range)], [120, 120], c = 'k')
     plt.grid(alpha = 0.5)
@@ -297,20 +331,22 @@ if __name__ == "__main__":
     ####### Plot filter examples
     plot_filters()
 
-    ####### Plots for TF
-    # f_range = np.arange(1., 30., 0.1)
-    # plot_slice('TF', f_range, save_flag = False)
-    # plot_heatmap('TF', f_range, save_flag = False)
-    #
-    # ####### Plots for SF
-    k_range = np.arange(0.005, 0.8, 0.005)
-    plot_slice('SF', [0.025, 0.1, 0.175], save_flag = False)
-    # plot_heatmap('SF', k_range, save_flag = False)
+    for sus in ['ON']:#, 'OFF']:
+        for tr in ['ON']:#, 'OFF']:
+            ####### Plots for TF
+            f_range = np.arange(1., 30., 1)#0.1)
+            plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True)
+            plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True)
 
-    ####### Plots for filter separation
-    # d_range = np.arange(0., 80., 1)
-    # plot_slice('d', [0, 3, 12.5, 22, 25], save_flag = False)
-    # plot_heatmap('d', d_range, save_flag = False)
+            # ####### Plots for SF
+            k_range = np.arange(0.005, 0.8, 0.05)#0.005)
+            plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)
+            plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)
+
+            ####### Plots for filter separation
+            d_range = np.arange(0., 80., 4)#1)
+            plot_slice('d', d_range, sustained_type=sus, transient_type = tr, save_flag = True)
+            plot_heatmap('d', d_range, sustained_type=sus, transient_type = tr, save_flag = True)
 
     plt.show()
 
