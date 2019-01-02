@@ -29,13 +29,13 @@ def get_sync(syncpath):
     
     #microscope acquisition frames    
 #    ophys_start = d.get_rising_edges('2p_acquiring')/sample_freq
-    twop_vsync_fall = d.get_falling_edges('vsync_2p')/sample_freq
+    twop_vsync_fall = d.get_falling_edges('2p_vsync')/sample_freq
 #    twop_vsync_fall = twop_vsync_fall[np.where(twop_vsync_fall > ophys_start)[0]]
     twop_diff = np.ediff1d(twop_vsync_fall)
     acquisition_rate = 1/np.mean(twop_diff)
     
 #    stimulus frames
-    stim_vsync_fall = d.get_falling_edges('vsync_stim')[1:]/sample_freq          #eliminating the DAQ pulse    
+    stim_vsync_fall = d.get_falling_edges('stim_vsync')[1:]/sample_freq          #eliminating the DAQ pulse    
     stim_vsync_diff = np.ediff1d(stim_vsync_fall)
     dropped_frames = np.where(stim_vsync_diff>0.033)[0]
     dropped_frames = stim_vsync_fall[dropped_frames]
@@ -46,7 +46,7 @@ def get_sync(syncpath):
     
     try:
         #photodiode transitions
-        photodiode_rise = d.get_rising_edges('photodiode')/sample_freq
+        photodiode_rise = d.get_rising_edges('stim_photodiode')/sample_freq
     
         #test and correct for photodiode transition errors
         ptd_rise_diff = np.ediff1d(photodiode_rise)
@@ -134,31 +134,34 @@ def get_sync_table(logpath, twop_frames):
                 if row.start >= display_sequence[seg,1]:
                     stimulus_table.start[index] = stimulus_table.start[index] - display_sequence[seg,1] + display_sequence[seg+1,0]
         stimulus_table.end = stimulus_table.start+stimulus_table.dif
-        print len(stimulus_table)            
+        stimulus_table = stimulus_table.astype(int)      
         stimulus_table = stimulus_table[stimulus_table.end <= display_sequence[-1,1]]
         stimulus_table = stimulus_table[stimulus_table.start <= display_sequence[-1,1]]            
-        print len(stimulus_table)  
         sync_table = pd.DataFrame(np.column_stack((twop_frames[stimulus_table['start']], twop_frames[stimulus_table['end']])), columns=('Start', 'End'))
 
 
         
-        if stim_name == 'drifting_gratings':
+        if stim_name.startswith('drifting_gratings'):
             sync_table['sweep_number'] = sweep_order[:len(stimulus_table)]  #should be able to remove the len(stimulus_table) when stimulus is fixed appropriately
             sweep_table = data['stimuli'][a]['sweep_table']
             dimnames = data['stimuli'][a]['dimnames']
             sweeptable = pd.DataFrame(sweep_table, columns=dimnames)
-            sync_table['SF'] = np.NaN            
-            sync_table['TF'] = np.NaN
-            sync_table['Ori'] = np.NaN
-            for index, row in sync_table.iterrows():
-                if row['sweep_number'] >= 0:
-                    sync_table['TF'][index] = sweeptable['TF'][int(row['sweep_number'])]
-                    sync_table['Ori'][index] = sweeptable['Ori'][int(row['sweep_number'])]
-                    sync_table['SF'][index] = sweeptable['SF'][int(row['sweep_number'])]
-                else:
-                    sync_table['TF'][index] = np.NaN
-                    sync_table['Ori'][index] = np.NaN
-                    sync_table['SF'][index] = np.NaN
+            sync_table['TF'] = sweeptable.TF[sweep_order].values
+            sync_table['SF'] = sweeptable.SF[sweep_order].values
+            sync_table['Ori'] = sweeptable.Ori[sweep_order].values
+            sync_table['Contrast'] = sweeptable.Contrast[sweep_order].values
+#            sync_table['SF'] = np.NaN            
+#            sync_table['TF'] = np.NaN
+#            sync_table['Ori'] = np.NaN
+#            for index, row in sync_table.iterrows():
+#                if row['sweep_number'] >= 0:
+#                    sync_table['TF'][index] = sweeptable['TF'][int(row['sweep_number'])]
+#                    sync_table['Ori'][index] = sweeptable['Ori'][int(row['sweep_number'])]
+#                    sync_table['SF'][index] = sweeptable['SF'][int(row['sweep_number'])]
+#                else:
+#                    sync_table['TF'][index] = np.NaN
+#                    sync_table['Ori'][index] = np.NaN
+#                    sync_table['SF'][index] = np.NaN
         else:    
             sync_table['Frame'] = sweep_order[:len(stimulus_table)]
         sync_dict[str(a)] = sync_table
@@ -167,37 +170,8 @@ def get_sync_table(logpath, twop_frames):
 
 #exptpath = r'/Volumes/braintv/workgroups/nc-ophys/ImageData/Saskia/20170531_307744/NaturalScenesUP'            
 #logpath, syncpath = get_files(exptpath)
-logpath = r'/Volumes/programs/braintv/workgroups/nc-ophys/ImageData/Saskia/20171010_335139/171010135807-DriftingGratingsSFTF.pkl'
-syncpath = r'/Volumes/programs/braintv/workgroups/nc-ophys/ImageData/Saskia/20171010_335139/171010_335139_DGSFTF171010125601.h5'
-twop_frames, acquisition_rate = get_sync(syncpath)
-sync_dict = get_sync_table(logpath, twop_frames)            
-            
-#        sync_table['Stimulus']=stim_name
-#        sync_table_full = pd.concat([sync_table_full, sync_table], ignore_index=True)            
-#    sync_table_full.sort(columns='Start', inplace=True, na_position='first')    #need to sort on Start time to find the spontaneous activity epochs
-#    sync_table_full.reset_index(drop=True, inplace=True)
-#    #get spontaneous activity epochs
-#    sp_index = []
-#    for index, row in sync_table_full.iterrows():
-#        if (index>0) & (row.Start>0):
-#            if not sync_table_full.End[index-1]>row.Start-2000:
-#                sp_index = np.append(sp_index, index)
-#    print "Spontaneous Activity Epochs: ", str(len(sp_index))
-#    for spt in sp_index:        
-#        temp = pd.DataFrame([['spontaneous',sync_table_full.End[spt-1]+150, sync_table_full.Start[spt]-1]], columns=('Stimulus','Start','End'))
-#        sync_table_full = pd.concat([sync_table_full, temp], ignore_index=True)
-#    #order columns, using only relevant columns
-#    names = ['Stimulus','Start','End','Image','Ori','SF','TF','Phase','Frame']
-#    names_final = []            
-#    for stn in names:
-#        if stn in list(sync_table_full.columns.values):
-#            names_final = np.append(names_final, stn)
-#    sync_table_full = sync_table_full[names_final]
-#    sync_table_full.sort(columns='Start', inplace=True)#, na_position='first')    #want final dataframe to be consistent - eg. sorted by time
-#    sync_table_full.reset_index(drop=True, inplace=True)
-#try:
-#    return sync_table_full, sweeptable
-#except:
-#    print "No sweeptable"
-#    sweeptable = []
-#    return sync_table_full, sweeptable
+#logpath = r'/Volumes/programs/braintv/workgroups/nc-ophys/ImageData/Saskia/20171010_335139/171010135807-DriftingGratingsSFTF.pkl'
+#syncpath = r'/Volumes/programs/braintv/workgroups/nc-ophys/ImageData/Saskia/20171010_335139/171010_335139_DGSFTF171010125601.h5'
+#twop_frames, acquisition_rate = get_sync(syncpath)
+#sync_dict = get_sync_table(logpath, twop_frames)            
+#            
