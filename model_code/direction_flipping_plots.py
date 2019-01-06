@@ -143,44 +143,92 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
     return
 
 
-def plot_heatmap(parameter, param_range, tau_sustained_range = np.arange(0.03, 0.231, 0.001), tau_transient = 0.03,
-                 sustained_type='ON', transient_type = 'OFF', tstep = 0.001, total_time = 10.0, save_flag = False):
+def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_range = np.arange(0.03, 0.231, 0.001),
+                 tau_transient = 0.03, sustained_type='ON', transient_type = 'OFF',
+                 tstep = 0.001, total_time = 10.0, save_flag = False):
+
+    if parameter == parameter2:
+        print "Both parameters are identical - Use plot_slice() function"
+        return
 
     if parameter =='TF':
         xlabel = 'TF (Hz)'
-        save_name = 's' + sustained_type + 't' + transient_type + '_TF_heatmap.png'
+        label_extent = [min(param_range), max(param_range)]
+        save_name = 's' + sustained_type + 't' + transient_type + '_TF_vs'
     elif parameter == 'SF':
         xlabel = 'SF (CPD)'
-        save_name = 's' + sustained_type + 't' + transient_type + '_SF_heatmap.png'
+        label_extent = [min(param_range), max(param_range)]
+        save_name = 's' + sustained_type + 't' + transient_type + '_SF_vs'
     elif parameter == 'd':
         xlabel = 'Filter Separation (Degrees)'
-        save_name = 's' + sustained_type + 't' + transient_type + '_Distance_heatmap.png'
+        save_name = 's' + sustained_type + 't' + transient_type + '_Distance_vs'
+        label_extent = [min(param_range), max(param_range)]
+    elif parameter == 'tau_sustained':
+        xlabel = 'Delta Tau (milliseconds)'
+        save_name = 's' + sustained_type + 't' + transient_type + 'DeltaTau_vs'
+        label_extent = [1000 * (min(param2_range) - tau_transient), 1000 * (max(param2_range) - tau_transient)]
     else:
-        print "Invalid parameter given. Please choose 'd', 'SF', or 'TF'."
+        print "Invalid parameter given. Please choose 'd', 'SF', 'TF', or 'tau_sustained'."
         return
 
-    if tau_transient > np.min(tau_sustained_range):
-        print "Transient time constant can't be greater than the minimum sustained time constant"
+    if parameter2 =='TF':
+        ylabel = 'TF (Hz)'
+        save_name += '_TF_heatmap.png'
+        label_extent.append(min(param2_range))
+        label_extent.append(max(param2_range))
+    elif parameter2 == 'SF':
+        ylabel = 'SF (CPD)'
+        save_name += '_SF_heatmap.png'
+        label_extent.append(min(param2_range))
+        label_extent.append(max(param2_range))
+    elif parameter2 == 'd':
+        ylabel = 'Filter Separation (Degrees)'
+        save_name += '_Distance_heatmap.png'
+        label_extent.append(min(param2_range))
+        label_extent.append(max(param2_range))
+    elif parameter2 == 'tau_sustained':
+        if tau_transient > np.min(param2_range):
+            print "Transient time constant can't be greater than the minimum sustained time constant"
+            return
+        ylabel = 'Delta Tau (milliseconds)'
+        save_name += '_DeltaTau_heatmap.png'
+        label_extent.append(1000 * (min(param2_range) - tau_transient))
+        label_extent.append(1000 * (max(param2_range) - tau_transient))
+
+    else:
+        print "Invalid parameter2 given. Please choose 'd', 'SF', 'TF', or 'tau_sustained'."
         return
 
 
     f = 2.0                 # Default temporal frequency in Hz
     k = 0.04                # Defaul spatial frequency in cycles per degree
     delt = 5.               # Default filter separation in degrees
+    tau_sustained = 0.15    # Default sustained unit time constant in seconds
 
 
-    DSI = np.zeros((len(param_range), len(tau_sustained_range)))   # Heatmap DSI values
+    DSI = np.zeros((len(param_range), len(param2_range)))   # Heatmap DSI values
 
     for i, p in enumerate(param_range):
         if parameter == 'TF':
             f = p
         elif parameter == 'SF':
             k = p
-        else:
+        elif parameter == 'd':
             delt = p
+        elif parameter == 'tau_sustained':
+            tau_sustained = p
 
-        for j, tau_sustained in enumerate(tau_sustained_range):
-            DSI[i, len(tau_sustained_range) - j - 1] = calculate_DSI(f, k, delt,
+        for j, p2 in enumerate(param2_range):
+            if parameter2 == 'TF':
+                f = p2
+            elif parameter2 == 'SF':
+                k = p2
+            elif parameter2 == 'd':
+                delt = p2
+            elif parameter2 == 'tau_sustained':
+                tau_sustained = p2
+
+            DSI[i, len(param2_range) - j - 1] = calculate_DSI(f, k, delt,
                                                                      total_time, tstep,
                                                                      sustained_type, transient_type,
                                                                      tau_sustained, tau_transient)
@@ -188,25 +236,24 @@ def plot_heatmap(parameter, param_range, tau_sustained_range = np.arange(0.03, 0
     plt.imshow(np.transpose(DSI),
                interpolation=None,
                cmap='seismic',
-               extent=[min(param_range),
-                       max(param_range),
-                       1000*(min(tau_sustained_range) - tau_transient),
-                       1000*(max(tau_sustained_range) - tau_transient)],
+               extent=label_extent,
                aspect='auto')
-    np.save('TF_heatmap.npy', np.transpose(DSI))
-    plt.ylabel('Delta Tau (milliseconds)')
+    # np.save('TF_heatmap.npy', np.transpose(DSI))
+    plt.ylabel(ylabel)
     plt.xlabel(xlabel)
     plt.title('s' + sustained_type + 't' + transient_type)
     plt.colorbar()
-    plt.plot([np.min(param_range), np.max(param_range)], [120, 120], c = 'k')
+    if parameter2 == 'tau_sustained':
+        plt.plot([np.min(param_range), np.max(param_range)], [120, 120], c = 'k')
+
     plt.grid(alpha = 0.5)
-    # plt.rc('xtick', labelsize=8)
-    # plt.rc('ytick', labelsize=8)
 
     if save_flag:
         plt.savefig(save_name)
 
     plt.show()
+
+
 
 def plot_filters(tau_list = [0.03, 0.13, 0.23], totaltime = 0.5, filter_type = 'ON'):
 
@@ -240,19 +287,26 @@ if __name__ == "__main__":
     for sus in ['ON', 'OFF']:
         for tr in ['ON', 'OFF']:
             ####### Plots for TF
-            f_range = np.arange(1., 30., 0.1)
+            f_range = np.arange(1., 30., 0.1)#0.1)
             plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True)
             plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True)
 
+
             # ####### Plots for SF
-            k_range = np.arange(0.005, 0.8, 0.005)
+            k_range = np.arange(0.005, 0.8, 0.005)#0.005)
             plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)
             plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)
 
             ####### Plots for filter separation
-            d_range = np.arange(0., 80., 1)
+            d_range = np.arange(0., 80., 1)#1)
             plot_slice('d', d_range, sustained_type=sus, transient_type = tr, save_flag = True)
             plot_heatmap('d', d_range, sustained_type=sus, transient_type = tr, save_flag = True)
+
+
+            ####### TF/SF Heatmap
+            plot_heatmap('TF', f_range, parameter2 = 'SF', param2_range = k_range,
+                                            sustained_type=sus, transient_type=tr, save_flag=True)
+
 
     plt.show()
 
