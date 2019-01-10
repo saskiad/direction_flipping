@@ -81,7 +81,7 @@ def calculate_DSI(f, k, delt,
 def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.03,
                sustained_type='ON', transient_type = 'OFF', tstep = 0.001, total_time = 10.0, save_flag = False):
     '''
-
+    Plot Direction Selectivity Index (DSI) as function of a single parameter (TF, SF, or d).
     :param parameter: filter parameter to sweep: TF, SF, or d
     :param param_range: the range of values for the parameter
     :param tau_transient: Time constant of transient filter (seconds)
@@ -146,7 +146,20 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
 def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_range = np.arange(0.03, 0.231, 0.001),
                  tau_transient = 0.03, sustained_type='ON', transient_type = 'OFF',
                  tstep = 0.001, total_time = 10.0, save_flag = False):
-
+    '''
+    Plot a Direction Selectivity Index (DSI) heatmap as a function any two parameters.
+    :param parameter: First parameter to sweep through
+    :param param_range:
+    :param parameter2:
+    :param param2_range:
+    :param tau_transient:
+    :param sustained_type:
+    :param transient_type:
+    :param tstep:
+    :param total_time:
+    :param save_flag:
+    :return:
+    '''
     if parameter == parameter2:
         print "Both parameters are identical - Use plot_slice() function"
         return
@@ -256,6 +269,13 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
 
 
 def plot_filters(tau_list = [0.03, 0.13, 0.23], totaltime = 0.5, filter_type = 'ON'):
+    '''
+    Function to plot square-wave filters used in the model
+    :param tau_list: Values of time-constant to plot
+    :param totaltime: Total time to plot
+    :param filter_type: ON or OFF to determine the sign of the filter
+    :return:
+    '''
 
     plt.figure(figsize=(8,8))
     tstep = 0.001
