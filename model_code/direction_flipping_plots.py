@@ -10,7 +10,6 @@ params = {'legend.fontsize': 21,
 
 pylab.rcParams.update(params)
 
-
 def calculate_DSI(f, k, delt,
                   total_time, tstep,
                   sustained_type, transient_type, tau_sustained, tau_transient):
@@ -72,7 +71,6 @@ def calculate_DSI(f, k, delt,
         # plt.title('k = ' + str(k) + ' for ' + str(degree))
         # plt.savefig('k = ' + str(int(k * 100)) + ' for ' + str(int(degree)))
         # plt.show()
-
         rates[j] = np.max(convolved2 + convolved1)
 
     # Return DSI
@@ -92,7 +90,6 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
     :param total_time: total time, seconds: make at least 10x of tau_sustained or 10x the period of lowest frequency
     :return: Makes a plot of DSI vs. parameter and saves it
     '''
-
 
     if parameter =='TF':
         xlabel = 'TF (Hz)'
@@ -116,7 +113,6 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
     delt = 5.               # Default filter separation in degrees
 
     DSI = np.zeros(len(param_range))              # DSI array to save all DSI values
-
 
     for i, p in enumerate(param_range):
         if parameter == 'TF':
@@ -142,23 +138,22 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
 
     return
 
-
 def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_range = np.arange(0.03, 0.231, 0.001),
                  tau_transient = 0.03, sustained_type='ON', transient_type = 'OFF',
                  tstep = 0.001, total_time = 10.0, save_flag = False):
     '''
     Plot a Direction Selectivity Index (DSI) heatmap as a function any two parameters.
-    :param parameter: First parameter to sweep through
-    :param param_range:
-    :param parameter2:
-    :param param2_range:
-    :param tau_transient:
-    :param sustained_type:
-    :param transient_type:
-    :param tstep:
-    :param total_time:
-    :param save_flag:
-    :return:
+    :param parameter: First parameter to sweep through (SF, TF, d, or tau_sustained)
+    :param param_range: Range of selected first parameter
+    :param parameter2: Optional second parameter to sweep through: default is tau_sustained
+    :param param2_range: Optional parameter range for second parameter
+    :param tau_transient: Transient time-constants
+    :param sustained_type: Sustained type (ON or OFF)
+    :param transient_type: Transient type (ON or OFF)
+    :param tstep: time-step of simulation
+    :param total_time: total time of simulation
+    :param save_flag: Flag of whether or not to save the figure (heatmap)
+    :return: a plot of the heatmap is created
     '''
     if parameter == parameter2:
         print "Both parameters are identical - Use plot_slice() function"
@@ -217,7 +212,6 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
     k = 0.04                # Defaul spatial frequency in cycles per degree
     delt = 5.               # Default filter separation in degrees
     tau_sustained = 0.15    # Default sustained unit time constant in seconds
-
 
     DSI = np.zeros((len(param_range), len(param2_range)))   # Heatmap DSI values
 
@@ -329,5 +323,3 @@ if __name__ == "__main__":
 
 
     plt.show()
-
-
