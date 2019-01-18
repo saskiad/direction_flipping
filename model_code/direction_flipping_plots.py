@@ -18,9 +18,16 @@ def calculate_DSI(f, k, delt,
     the two functions below of plot_slice and plot_heatmap. Will need
     to take in the taus, types, parameters, timestep and total
     time.
-    Need to acocunt for filter types
-    to solve every combination ON/ON, ON/OFF, OFF/OFF, OFF/ON
-    :return:
+    :param f:
+    :param k:
+    :param delt:
+    :param total_time:
+    :param tstep
+    :param sustained_type
+    :param transient_type
+    :param tau_sustained
+    :param tau_transient
+    :return: Final DSI value: (Pref - Null) / (Pref + Null)
     '''
 
     if transient_type == 'ON':
