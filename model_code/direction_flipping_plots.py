@@ -21,7 +21,7 @@ def calculate_DSI(f, k, delt,
     :param f: Temporal frequency in Hz
     :param k: Spatial frequency in cycles per degree
     :param delt: Distance between filters in degrees
-    :param total_time: Total simulation time
+    :param total_time: Total simulation time in seconds
     :param tstep: Size of time-step
     :param sustained_type: Type on sustained filter (ON or OFF)
     :param transient_type: Type on transient filter (ON or OFF)
@@ -76,13 +76,16 @@ def calculate_DSI(f, k, delt,
         convolved2 = np.convolve(transient_filter, y2, 'valid')
         convolved1 /= np.max(convolved1)
         convolved2 /= np.max(convolved2)
-        # plt.figure()
-        # time_plot = np.arange(0, 2/f, tstep)
-        # plt.plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
-        # plt.plot(time_plot, convolved2[:len(time_plot)], label='Transient')
-        # plt.legend()
-        # plt.title('f = ' + str(f) + ' for ' + str(degree))
-        # plt.savefig('f = ' + str(int(f)) + '-' + str(int(10*(f - np.floor(f)))) + ' for ' + str(int(degree)))
+        plt.figure(figsize=(20,10))
+        time_plot = np.arange(0, 2/f, tstep)
+        plt.plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
+        plt.plot(time_plot, convolved2[:len(time_plot)], label='Transient')
+        plt.xlabel('Time (Seconds)')
+        plt.ylabel('Response Amplitude (Arb. U.)')
+        plt.xlim(0, np.max(time_plot) * 2.5)
+        plt.legend()
+        plt.title('f = ' + str(f) + ' for ' + str(degree))
+        plt.savefig('f = ' + str(int(f)) + '-' + str(int(10*(f - np.floor(f)))) + ' for ' + str(int(degree)))
 
 
         rates[j] = np.max(convolved2 + convolved1)
@@ -276,7 +279,7 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
 
 
 
-def plot_filters(tau_list = [0.03, 0.13, 0.23], totaltime = 0.5, filter_type = 'ON'):
+def plot_filters(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5, filter_type = 'ON'):
     '''
     Function to plot square-wave filters used in the model
     :param tau_list: Values of time-constant to plot
