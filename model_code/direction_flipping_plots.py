@@ -12,7 +12,8 @@ pylab.rcParams.update(params)
 
 def calculate_DSI(f, k, delt,
                   total_time, tstep,
-                  sustained_type, transient_type, tau_sustained, tau_transient):
+                  sustained_type, transient_type, tau_sustained, tau_transient,
+                  filter = 'default'):
     '''
     This function calculated the DSI to remove the double use of code in
     the two functions below of plot_slice and plot_heatmap. Will need
@@ -68,9 +69,10 @@ def calculate_DSI(f, k, delt,
         transient_filter[:int(tau_transient / tstep)] = scale_ratio_transient
 
         ### With a exponential profile
-        # filter_time = np.arange(0, filter_total_time, tstep)
-        # sustained_filter = scale_ratio_sustained * np.exp(-filter_time/tau_sustained)
-        # transient_filter = scale_ratio_transient * np.exp(-filter_time/tau_transient)
+        if filter == 'exp':
+            filter_time = np.arange(0, filter_total_time, tstep)
+            sustained_filter = scale_ratio_sustained * np.exp(-filter_time/tau_sustained)
+            transient_filter = scale_ratio_transient * np.exp(-filter_time/tau_transient)
 
         convolved1 = np.convolve(sustained_filter, y1, 'valid')
         convolved2 = np.convolve(transient_filter, y2, 'valid')
