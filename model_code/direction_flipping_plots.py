@@ -301,14 +301,10 @@ def plot_filters(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5, filter_type = '
         print "filter_types can only be ON or OFF - can't plot filter"
         return
 
-    filter2 = np.zeros(len(time))
-    delay = 0.2
     for tau in tau_list:
         filter = np.zeros(len(time))
         filter[:int(tau / tstep)] = scale_factor
-        filter = (time / tau) * (np.exp(-time / tau))
-        filter2[int(delay/tstep):] = ((time[int(delay/tstep):] - delay) / 0.03) * (np.exp(-(time[int(delay/tstep):] - delay) / 0.03))
-        plt.plot(time, filter + filter2, lw = 12.0, color = 'darkmagenta')
+        plt.plot(time, filter)
     plt.xlabel('Tau (Seconds)')
     plt.ylabel('Response (unitless)')
     plt.savefig('Example Temporal Filters')
@@ -319,7 +315,7 @@ def plot_filters(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5, filter_type = '
 if __name__ == "__main__":
 
     ####### Plot filter examples
-    plot_filters(tau_list=[0.1], totaltime=0.8)
+    plot_filters()
 
     for sus in ['ON', 'OFF']:
         for tr in ['ON', 'OFF']:
