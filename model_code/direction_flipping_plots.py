@@ -301,10 +301,14 @@ def plot_filters(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5, filter_type = '
         print "filter_types can only be ON or OFF - can't plot filter"
         return
 
+    filter2 = np.zeros(len(time))
+    delay = 0.2
     for tau in tau_list:
         filter = np.zeros(len(time))
         filter[:int(tau / tstep)] = scale_factor
-        plt.plot(time, filter)
+        filter = (time / tau) * (np.exp(-time / tau))
+        filter2[int(delay/tstep):] = ((time[int(delay/tstep):] - delay) / 0.03) * (np.exp(-(time[int(delay/tstep):] - delay) / 0.03))
+        plt.plot(time, filter + filter2, lw = 12.0, color = 'darkmagenta')
     plt.xlabel('Tau (Seconds)')
     plt.ylabel('Response (unitless)')
     plt.savefig('Example Temporal Filters')
@@ -315,38 +319,38 @@ def plot_filters(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5, filter_type = '
 if __name__ == "__main__":
 
     ####### Plot filter examples
-    plot_filters()
+    plot_filters(tau_list=[0.1], totaltime=0.8)
 
-    for sus in ['ON', 'OFF']:
-        for tr in ['ON', 'OFF']:
-            ###### Plots for TF
-            f_range = np.arange(1., 30., 0.1)#0.1)
-            plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = False)
-            plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True)
-
-
-            # ####### Plots for SF
-            k_range = np.arange(0.005, 0.8, 0.005)#0.005)
-            plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = False)
-            plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = False)
-
-            ####### Plots for filter separation
-            d_range = np.arange(0., 80., 1)#1)
-            plot_slice('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
-            plot_heatmap('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
-
-
-            ####### TF/SF Heatmap
-            plot_heatmap('TF', f_range, parameter2 = 'SF', param2_range = k_range,
-                                            sustained_type=sus, transient_type=tr, save_flag=False)
-
-
-
-
-    for f in [3.3, 8.3, 13.4]:                  # Default temporal frequency in Hz
-        k = 0.04                                # Defaul spatial frequency in cycles pe
-        delt = 5.                               # Default filter separation in degrees
-        tstep = 0.001
-        total_time = 10.0
-        print calculate_DSI(f, k, delt, total_time, tstep, 'ON', 'OFF', 0.15, 0.03)
+    # for sus in ['ON', 'OFF']:
+    #     for tr in ['ON', 'OFF']:
+    #         ###### Plots for TF
+    #         f_range = np.arange(1., 30., 0.1)#0.1)
+    #         plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = False)
+    #         plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True)
+    #
+    #
+    #         # ####### Plots for SF
+    #         k_range = np.arange(0.005, 0.8, 0.005)#0.005)
+    #         plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = False)
+    #         plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = False)
+    #
+    #         ####### Plots for filter separation
+    #         d_range = np.arange(0., 80., 1)#1)
+    #         plot_slice('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
+    #         plot_heatmap('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
+    #
+    #
+    #         ####### TF/SF Heatmap
+    #         plot_heatmap('TF', f_range, parameter2 = 'SF', param2_range = k_range,
+    #                                         sustained_type=sus, transient_type=tr, save_flag=False)
+    #
+    #
+    #
+    #
+    # for f in [3.3, 8.3, 13.4]:                  # Default temporal frequency in Hz
+    #     k = 0.04                                # Defaul spatial frequency in cycles pe
+    #     delt = 5.                               # Default filter separation in degrees
+    #     tstep = 0.001
+    #     total_time = 10.0
+    #     print calculate_DSI(f, k, delt, total_time, tstep, 'ON', 'OFF', 0.15, 0.03)
     plt.show()
