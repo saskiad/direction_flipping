@@ -306,9 +306,11 @@ def plot_filters(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5, filter_type = '
     for tau in tau_list:
         filter = np.zeros(len(time))
         filter[:int(tau / tstep)] = scale_factor
-        filter = (time / tau) * (np.exp(-time / tau))
-        filter2[int(delay/tstep):] = ((time[int(delay/tstep):] - delay) / 0.03) * (np.exp(-(time[int(delay/tstep):] - delay) / 0.03))
-        plt.plot(time, filter + filter2, lw = 12.0, color = 'darkmagenta')
+        # This is for alpha functions
+        # filter = (time / tau) * (np.exp(-time / tau))
+        # filter2[int(delay/tstep):] = ((time[int(delay/tstep):] - delay) / 0.03) * (np.exp(-(time[int(delay/tstep):] - delay) / 0.03))
+        # plt.plot(time, filter + filter2, lw = 12.0, color = 'darkmagenta')
+
     plt.xlabel('Tau (Seconds)')
     plt.ylabel('Response (unitless)')
     plt.savefig('Example Temporal Filters')
