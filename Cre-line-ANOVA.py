@@ -4,7 +4,6 @@ import scipy.stats as stats
 
 cre_DF = pd.read_csv('/Users/yazanb/Dropbox/Allen Institute/Manuscripts/DRNs/drn_exp.csv')
 
-
 Cux2 = np.array(cre_DF.percent)[cre_DF.cre == 'Cux2-CreERT2']
 Emx1 = np.array(cre_DF.percent)[cre_DF.cre == 'Emx1-IRES-Cre']
 Fezf2 = np.array(cre_DF.percent)[cre_DF.cre == 'Fezf2-CreER']
@@ -33,7 +32,3 @@ RL = np.array(cre_DF.percent)[cre_DF.area == 'VISrl']
 
 print "Areas:"
 print stats.f_oneway(AM, AL, P, L, PM, RL)
-
-
-
-
