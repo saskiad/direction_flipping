@@ -307,15 +307,25 @@ def plot_filters(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5, filter_type = '
         filter = np.zeros(len(time))
         filter[:int(tau / tstep)] = scale_factor
 
-        # This is for alpha functions
-        # filter = (time / tau) * (np.exp(-time / tau))
-        # filter2[int(delay/tstep):] = ((time[int(delay/tstep):] - delay) / 0.03) * (np.exp(-(time[int(delay/tstep):] - delay) / 0.03))
-        # plt.plot(time, filter + filter2, lw = 12.0, color = 'darkmagenta')
     plt.xlabel('Tau (Seconds)')
     plt.ylabel('Response (unitless)')
     plt.savefig('Example Temporal Filters')
 
     return
+
+def plot_sustained_trasnsient_for_V1(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5):
+
+
+    # This is for alpha functions
+    tstep = 0.001
+    time = np.arange(0, totaltime, tstep)
+    tau = 0.3  ### HERE
+
+    filter2 = np.zeros(len(time))
+    delay = 0.2
+    filter = (time / tau) * (np.exp(-time / tau))
+    filter2[int(delay/tstep):] = ((time[int(delay/tstep):] - delay) / 0.03) * (np.exp(-(time[int(delay/tstep):] - delay) / 0.03))
+    plt.plot(time, filter + filter2, lw = 12.0, color = 'darkmagenta')
 
 
 if __name__ == "__main__":
