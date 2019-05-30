@@ -94,7 +94,7 @@ def calculate_DSI(f, k, delt,
         threshold = 20.
         sum_filters = convolved2 + convolved1
         sum_filters[sum_filters < threshold] = 0.
-        # rates[j] = np.max(convolved2 + convolved1)
+        # rates[j] = np.max(convolved2 + convolved1)  # For no threshold.
         rates[j] = np.mean(sum_filters)
 
      # Return DSI
@@ -344,15 +344,15 @@ if __name__ == "__main__":
             plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True)
 
 
-            # ####### Plots for SF
-            k_range = np.arange(0.005, 0.8, 0.005)#0.005)
-            plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = False)
-            plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = False)
-
-            ####### Plots for filter separation
-            d_range = np.arange(0., 80., 1)#1)
-            plot_slice('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
-            plot_heatmap('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
+            # # ####### Plots for SF
+            # k_range = np.arange(0.005, 0.8, 0.005)#0.005)
+            # plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = False)
+            # plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = False)
+            #
+            # ####### Plots for filter separation
+            # d_range = np.arange(0., 80., 1)#1)
+            # plot_slice('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
+            # plot_heatmap('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
 
 
             ####### TF/SF Heatmap
