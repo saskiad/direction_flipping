@@ -80,16 +80,16 @@ def calculate_DSI(f, k, delt,
         # convolved2[convolved2 < 0] = 0
         # convolved1 /= np.max(convolved1)
         # convolved2 /= np.max(convolved2)
-        plt.figure(figsize=(20,10))
-        time_plot = np.arange(0, 2/f, tstep)
-        plt.plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
-        plt.plot(time_plot, convolved2[:len(time_plot)], label='Transient')
-        plt.xlabel('Time (Seconds)')
-        plt.ylabel('Response Amplitude (Arb. U.)')
-        plt.xlim(0, np.max(time_plot) * 2.5)
-        plt.legend()
-        plt.title('f = ' + str(f) + ' for ' + str(degree))
-        plt.savefig('f = ' + str(int(f)) + '-' + str(int(10*(f - np.floor(f)))) + ' for ' + str(int(degree)))
+        # plt.figure(figsize=(20,10))
+        # time_plot = np.arange(0, 2/f, tstep)
+        # plt.plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
+        # plt.plot(time_plot, convolved2[:len(time_plot)], label='Transient')
+        # plt.xlabel('Time (Seconds)')
+        # plt.ylabel('Response Amplitude (Arb. U.)')
+        # plt.xlim(0, np.max(time_plot) * 2.5)
+        # plt.legend()
+        # plt.title('f = ' + str(f) + ' for ' + str(degree))
+        # plt.savefig('f = ' + str(int(f)) + '-' + str(int(10*(f - np.floor(f)))) + ' for ' + str(int(degree)))
 
         threshold = 20.
         sum_filters = convolved2 + convolved1
