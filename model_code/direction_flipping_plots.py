@@ -2,11 +2,11 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.pylab as pylab
 
-params = {'legend.fontsize': 21,
-          'axes.labelsize':  21,
-          'axes.titlesize':  21,
-          'xtick.labelsize': 21,
-          'ytick.labelsize': 21}
+params = {'legend.fontsize': 50,
+          'axes.labelsize':  50,
+          'axes.titlesize':  50,
+          'xtick.labelsize': 50,
+          'ytick.labelsize': 50}
 
 pylab.rcParams.update(params)
 
@@ -78,24 +78,25 @@ def calculate_DSI(f, k, delt,
         convolved2 = np.convolve(transient_filter, y2, 'valid')
         # convolved1[convolved1 < 0] = 0
         # convolved2[convolved2 < 0] = 0
-        # convolved1 /= np.max(convolved1)
-        # convolved2 /= np.max(convolved2)
-        # plt.figure(figsize=(20,10))
-        # time_plot = np.arange(0, 2/f, tstep)
-        # plt.plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
-        # plt.plot(time_plot, convolved2[:len(time_plot)], label='Transient')
-        # plt.xlabel('Time (Seconds)')
-        # plt.ylabel('Response Amplitude (Arb. U.)')
+        convolved1 /= np.max(convolved1)
+        convolved2 /= np.max(convolved2)
+        plt.figure(figsize=(20,10))
+        time_plot = np.arange(0, 2/f, tstep)
+        plt.plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
+        plt.plot(time_plot, convolved2[:len(time_plot)], label='Transient')
+        plt.plot(time_plot, convolved1[:len(time_plot)] + convolved2[:len(time_plot)], label = 'Sum', lw = 3)
+        plt.xlabel('Time (Seconds)')
+        plt.ylabel('Response Amplitude (Arb. U.)')
         # plt.xlim(0, np.max(time_plot) * 2.5)
         # plt.legend()
-        # plt.title('f = ' + str(f) + ' for ' + str(degree))
-        # plt.savefig('f = ' + str(int(f)) + '-' + str(int(10*(f - np.floor(f)))) + ' for ' + str(int(degree)))
+        plt.title('f = ' + str(f) + ' for ' + str(degree))
+        plt.savefig('f = ' + str(int(f)) + '-' + str(int(10*(f - np.floor(f)))) + ' for ' + str(int(degree)))
 
-        threshold = 20.
+        # threshold = 20.
         sum_filters = convolved2 + convolved1
-        sum_filters[sum_filters < threshold] = 0.
-        # rates[j] = np.max(convolved2 + convolved1)  # For no threshold.
-        rates[j] = np.mean(sum_filters)
+        # sum_filters[sum_filters < threshold] = 0.
+        rates[j] = np.max(convolved2 + convolved1)  # For no threshold.
+        # rates[j] = np.mean(sum_filters)
 
      # Return DSI
     return (rates[0] - rates[1]) / (rates[1] + rates[0])
@@ -336,12 +337,12 @@ if __name__ == "__main__":
      ####### Plot filter examples
     plot_filters(tau_list=[0.1], totaltime=0.8)
 
-    for sus in ['ON']:
-        for tr in ['OFF']:
+    # for sus in ['ON']:
+    #     for tr in ['OFF']:
             ###### Plots for TF
-            f_range = np.arange(1., 30., 0.1)#0.1)
-            plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = False)
-            plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True)
+            # f_range = np.arange(1., 30., 2)#0.1)
+            # plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = False)
+            # plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True)
 
 
             # # ####### Plots for SF
@@ -361,11 +362,10 @@ if __name__ == "__main__":
 
 
 
-    #
-    # for f in [3.3, 8.3, 13.4]:                  # Default temporal frequency in Hz
-    #     k = 0.04                                # Defaul spatial frequency in cycles pe
-    #     delt = 5.                               # Default filter separation in degrees
-    #     tstep = 0.001
-    #     total_time = 10.0
-    #     print calculate_DSI(f, k, delt, total_time, tstep, 'ON', 'OFF', 0.15, 0.03)
+    for f in [3.3, 8.3, 13.4]:                  # Default temporal frequency in Hz
+        k = 0.04                                # Defaul spatial frequency in cycles pe
+        delt = 5.                               # Default filter separation in degrees
+        tstep = 0.001
+        total_time = 10.0
+        print calculate_DSI(f, k, delt, total_time, tstep, 'ON', 'OFF', 0.15, 0.03)
     plt.show()
