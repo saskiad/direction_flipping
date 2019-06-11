@@ -287,7 +287,7 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
 
 
 
-def plot_filters(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5, filter_type = 'ON'):
+def plot_filters(tau_list = [0.15, 0.03], totaltime = 0.3, filter_type = 'ON'):
     '''
     Function to plot square-wave filters used in the model
     :param tau_list: Values of time-constant to plot
@@ -310,6 +310,8 @@ def plot_filters(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5, filter_type = '
     for tau in tau_list:
         filter = np.zeros(len(time))
         filter[:int(tau / tstep)] = scale_factor
+        print 'tau: ', tau
+        plt.plot(time, filter, lw = 5)
 
     plt.xlabel('Tau (Seconds)')
     plt.ylabel('Response (unitless)')
@@ -317,7 +319,7 @@ def plot_filters(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5, filter_type = '
 
     return
 
-def plot_sustained_trasnsient_for_V1(tau_list = [0.13, 0.03, 0.23], totaltime = 0.5):
+def plot_sustained_trasnsient_for_V1(tau_list = [0.15, 0.03], totaltime = 0.5):
 
 
      # This is for alpha functions
@@ -335,7 +337,8 @@ def plot_sustained_trasnsient_for_V1(tau_list = [0.13, 0.03, 0.23], totaltime = 
 if __name__ == "__main__":
 
      ####### Plot filter examples
-    plot_filters(tau_list=[0.1], totaltime=0.8)
+    #tau_list = [0.1], totaltime = 0.8
+    plot_filters()
 
     # for sus in ['ON']:
     #     for tr in ['OFF']:
@@ -362,10 +365,10 @@ if __name__ == "__main__":
 
 
 
-    for f in [3.3, 8.3, 13.4]:                  # Default temporal frequency in Hz
-        k = 0.04                                # Defaul spatial frequency in cycles pe
-        delt = 5.                               # Default filter separation in degrees
-        tstep = 0.001
-        total_time = 10.0
-        print calculate_DSI(f, k, delt, total_time, tstep, 'ON', 'OFF', 0.15, 0.03)
-    plt.show()
+    # for f in [3.3, 8.3, 13.4]:                  # Default temporal frequency in Hz
+    #     k = 0.04                                # Defaul spatial frequency in cycles pe
+    #     delt = 5.                               # Default filter separation in degrees
+    #     tstep = 0.001
+    #     total_time = 10.0
+    #     print calculate_DSI(f, k, delt, total_time, tstep, 'ON', 'OFF', 0.15, 0.03)
+    # plt.show()
