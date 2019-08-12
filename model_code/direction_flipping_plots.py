@@ -2,18 +2,18 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.pylab as pylab
 
-params = {'legend.fontsize': 50,
-          'axes.labelsize':  50,
-          'axes.titlesize':  50,
-          'xtick.labelsize': 50,
-          'ytick.labelsize': 50}
+params = {'legend.fontsize': 25,
+          'axes.labelsize':  25,
+          'axes.titlesize':  25,
+          'xtick.labelsize': 25,
+          'ytick.labelsize': 25}
 
 pylab.rcParams.update(params)
 
 def calculate_DSI(f, k, delt,
                   total_time, tstep,
                   sustained_type, transient_type, tau_sustained, tau_transient,
-                  filter = 'default'):
+                  filter = 'default', plot = False):
     '''
     This function calculated the DSI to remove the double use of code in
     the two functions below of plot_slice and plot_heatmap. Will need
@@ -80,17 +80,21 @@ def calculate_DSI(f, k, delt,
         # convolved2[convolved2 < 0] = 0
         convolved1 /= np.max(convolved1)
         convolved2 /= np.max(convolved2)
-        plt.figure(figsize=(20,10))
-        time_plot = np.arange(0, 2/f, tstep)
-        plt.plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
-        plt.plot(time_plot, convolved2[:len(time_plot)], label='Transient')
-        plt.plot(time_plot, convolved1[:len(time_plot)] + convolved2[:len(time_plot)], label = 'Sum', lw = 3)
-        plt.xlabel('Time (Seconds)')
-        plt.ylabel('Response Amplitude (Arb. U.)')
-        # plt.xlim(0, np.max(time_plot) * 2.5)
-        # plt.legend()
-        plt.title('f = ' + str(f) + ' for ' + str(degree))
-        plt.savefig('f = ' + str(int(f)) + '-' + str(int(10*(f - np.floor(f)))) + ' for ' + str(int(degree)))
+
+        if plot:
+            if degree == 0:
+                fig, ax = plt.figure(figsize=(10,10))
+                plt.subplots(1,2)
+                time_plot = np.arange(0, 2/f, tstep)
+            ax[j].plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
+            ax[j].plot(time_plot, convolved2[:len(time_plot)], label='Transient')
+            ax[j].plot(time_plot, convolved1[:len(time_plot)] + convolved2[:len(time_plot)], label = 'Sum', lw = 3)
+            ax[j].set_xlabel('Time (Seconds)')
+            ax[j].set_ylabel('Response Amplitude (Arb. U.)')
+            # plt.xlim(0, np.max(time_plot) * 2.5)
+            # plt.legend()
+            # plt.title('f = ' + str(f) + ' for ' + str(degree))
+            plt.savefig('f = ' + str(int(f)) + '-' + str(int(10*(f - np.floor(f)))) + ' for ' + str(int(degree)))
 
         # threshold = 20.
         sum_filters = convolved2 + convolved1
@@ -102,7 +106,8 @@ def calculate_DSI(f, k, delt,
     return (rates[0] - rates[1]) / (rates[1] + rates[0])
 
 def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.03,
-               sustained_type='ON', transient_type = 'OFF', tstep = 0.001, total_time = 10.0, save_flag = False):
+               sustained_type='ON', transient_type = 'OFF', tstep = 0.001, total_time = 10.0, save_flag = False,
+               cat = False):
     '''
     Plot Direction Selectivity Index (DSI) as function of a single parameter (TF, SF, or d).
     :param parameter: filter parameter to sweep: TF, SF, or d
@@ -137,6 +142,13 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
     k = 0.04                # Defaul spatial frequency in cycles per degree
     delt = 5.#5.               # Default filter separation in degrees
 
+    if cat:
+        delt = 0.7
+        tau_sustained = 0.05
+        tau_transient = 0.04
+        save_name = save_name + '_cat'
+
+
     DSI = np.zeros(len(param_range))              # DSI array to save all DSI values
 
     for i, p in enumerate(param_range):
@@ -152,20 +164,21 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
                       sustained_type, transient_type,
                       tau_sustained, tau_transient)
 
-    plt.figure(figsize=(8,8))
-    plt.plot(param_range, DSI, c = 'royalblue')
-    plt.plot([np.min(param_range), np.max(param_range)], [0, 0], 'k')
+    plt.figure(figsize=(11,11))
+    plt.plot(param_range, DSI, c = 'royalblue', lw = 5.0)
+    plt.plot([np.min(param_range), np.max(param_range)], [0, 0], 'k', lw = 1.75)
     plt.ylabel('DSI (unitless)')
     plt.xlabel(xlabel)
     plt.title('s' + sustained_type + 't' + transient_type)
+    plt.ylim(-1, 1)
     if save_flag:
-        plt.savefig(save_name)
+        plt.savefig(save_name + '.png')
 
     return
 
-def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_range = np.arange(0.03, 0.231, 0.001),
+def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_range = np.arange(0.03, 0.23, 0.001),
                  tau_transient = 0.03, sustained_type='ON', transient_type = 'OFF',
-                 tstep = 0.001, total_time = 10.0, save_flag = False):
+                 tstep = 0.001, total_time = 10.0, cat = False, save_flag = False):
     '''
     Plot a Direction Selectivity Index (DSI) heatmap as a function any two parameters.
     :param parameter: First parameter to sweep through (SF, TF, d, or tau_sustained)
@@ -183,6 +196,18 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
     if parameter == parameter2:
         print "Both parameters are identical - Use plot_slice() function"
         return
+
+    f = 2.0                 # Default temporal frequency in Hz
+    k = 0.04                # Defaul spatial frequency in cycles per degree
+    delt = 5.#5.               # Default filter separation in degrees
+    tau_sustained = 0.15    # Default sustained unit time constant in seconds
+
+    if cat:
+        delt = 0.7
+        tau_sustained = 0.05
+        tau_transient = 0.04
+        if parameter2 == 'tau_sustained':
+            param2_range = np.arange(0.04, 0.24, 0.001)
 
     if parameter =='TF':
         xlabel = 'TF (Hz)'
@@ -206,17 +231,17 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
 
     if parameter2 =='TF':
         ylabel = 'TF (Hz)'
-        save_name += '_TF_heatmap.png'
+        save_name += '_TF_heatmap'
         label_extent.append(min(param2_range))
         label_extent.append(max(param2_range))
     elif parameter2 == 'SF':
         ylabel = 'SF (CPD)'
-        save_name += '_SF_heatmap.png'
+        save_name += '_SF_heatmap'
         label_extent.append(min(param2_range))
         label_extent.append(max(param2_range))
     elif parameter2 == 'd':
         ylabel = 'Filter Separation (Degrees)'
-        save_name += '_Distance_heatmap.png'
+        save_name += '_Distance_heatmap'
         label_extent.append(min(param2_range))
         label_extent.append(max(param2_range))
     elif parameter2 == 'tau_sustained':
@@ -224,7 +249,7 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
             print "Transient time constant can't be greater than the minimum sustained time constant"
             return
         ylabel = 'Delta Tau (milliseconds)'
-        save_name += '_DeltaTau_heatmap.png'
+        save_name += '_DeltaTau_heatmap'
         label_extent.append(1000 * (min(param2_range) - tau_transient))
         label_extent.append(1000 * (max(param2_range) - tau_transient))
 
@@ -232,11 +257,9 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
         print "Invalid parameter2 given. Please choose 'd', 'SF', 'TF', or 'tau_sustained'."
         return
 
+    if cat:
+        save_name = save_name + '_cat'
 
-    f = 2.0                 # Default temporal frequency in Hz
-    k = 0.04                # Defaul spatial frequency in cycles per degree
-    delt = 5.#5.               # Default filter separation in degrees
-    tau_sustained = 0.15    # Default sustained unit time constant in seconds
 
     DSI = np.zeros((len(param_range), len(param2_range)))   # Heatmap DSI values
 
@@ -264,24 +287,27 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
                                                                      total_time, tstep,
                                                                      sustained_type, transient_type,
                                                                      tau_sustained, tau_transient)
-    plt.figure(figsize=(8,8))
+    plt.figure(figsize=(12,12))
     plt.imshow(np.transpose(DSI),
                interpolation=None,
                cmap='seismic',
                extent=label_extent,
+               vmin = -1, vmax = 1,
                aspect='auto')
     # np.save('TF_heatmap.npy', np.transpose(DSI))
     plt.ylabel(ylabel)
     plt.xlabel(xlabel)
     plt.title('s' + sustained_type + 't' + transient_type)
-    plt.colorbar()
-    if parameter2 == 'tau_sustained':
-        plt.plot([np.min(param_range), np.max(param_range)], [120, 120], c = 'k')
+    plt.colorbar(ticks= [-1, 0, 1])
+    if parameter2 == 'tau_sustained' and not cat:
+        plt.plot([np.min(param_range), np.max(param_range)], [120, 120], c = 'k', lw = 5.)
+    elif parameter2 == 'tau_sustained' and cat:
+        plt.plot([np.min(param_range), np.max(param_range)], [10, 10], c='k', lw = 5.)
 
-    plt.grid(alpha = 0.5)
+    # plt.grid(alpha = 0.5)
 
     if save_flag:
-        plt.savefig(save_name)
+        plt.savefig(save_name + '.png')
 
     plt.show()
 
@@ -307,11 +333,12 @@ def plot_filters(tau_list = [0.15, 0.03], totaltime = 0.3, filter_type = 'ON'):
         print "filter_types can only be ON or OFF - can't plot filter"
         return
 
-    for tau in tau_list:
+    colors = ['royalblue', 'orange']
+    for i, tau in enumerate(tau_list):
         filter = np.zeros(len(time))
         filter[:int(tau / tstep)] = scale_factor
         print 'tau: ', tau
-        plt.plot(time, filter, lw = 5)
+        plt.plot(time, filter, lw = 5, c = colors[i%2])
 
     plt.xlabel('Tau (Seconds)')
     plt.ylabel('Response (unitless)')
@@ -319,7 +346,7 @@ def plot_filters(tau_list = [0.15, 0.03], totaltime = 0.3, filter_type = 'ON'):
 
     return
 
-def plot_sustained_trasnsient_for_V1(tau_list = [0.15, 0.03], totaltime = 0.5):
+def plot_sustained_trasnsient_for_V1(totaltime = 0.5):
 
 
      # This is for alpha functions
@@ -340,18 +367,20 @@ if __name__ == "__main__":
     #tau_list = [0.1], totaltime = 0.8
     plot_filters()
 
-    # for sus in ['ON']:
-    #     for tr in ['OFF']:
-            ###### Plots for TF
-            # f_range = np.arange(1., 30., 2)#0.1)
-            # plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = False)
-            # plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True)
+    for sus in ['ON']:
+        for tr in ['OFF']:
+            ##### Plots for TF
+            f_range = np.arange(0.0, 25., .1)#0.1)
+            # plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True, cat = False)
+            # plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True, cat = False)
 
 
             # # ####### Plots for SF
-            # k_range = np.arange(0.005, 0.8, 0.005)#0.005)
-            # plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = False)
-            # plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = False)
+            k_range = np.arange(0.005, 0.8, 0.005)#0.005)
+            plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)
+            plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)
+            plot_slice('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True)
+            plot_heatmap('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True)
             #
             # ####### Plots for filter separation
             # d_range = np.arange(0., 80., 1)#1)
@@ -370,5 +399,5 @@ if __name__ == "__main__":
     #     delt = 5.                               # Default filter separation in degrees
     #     tstep = 0.001
     #     total_time = 10.0
-    #     print calculate_DSI(f, k, delt, total_time, tstep, 'ON', 'OFF', 0.15, 0.03)
+    #     calculate_DSI(f, k, delt, total_time, tstep, 'ON', 'OFF', 0.15, 0.03, plot = True)
     # plt.show()
