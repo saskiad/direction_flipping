@@ -36,7 +36,7 @@ def calculate_DSI(f, k, delt,
     elif transient_type == 'OFF':
         scale_ratio_transient = -1.0
     else:
-        print "transient filter can only be ON or OFF"
+        print ("transient filter can only be ON or OFF")
         return
 
     if sustained_type == 'ON':
@@ -44,7 +44,7 @@ def calculate_DSI(f, k, delt,
     elif sustained_type == 'OFF':
         scale_ratio_sustained = -1.0
     else:
-        print "sustained filter can only be ON or OFF"
+        print ("sustained filter can only be ON or OFF")
         return
 
 
@@ -131,11 +131,11 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
         xlabel = 'Filter Separation (Degrees)'
         save_name = 's' + sustained_type + 't' + transient_type + '_Distance_slice.png'
     else:
-        print "Invalid parameter given. Please choose 'd', 'SF', or 'TF'."
+        print ("Invalid parameter given. Please choose 'd', 'SF', or 'TF'.")
         return
 
     if tau_transient > tau_sustained:
-        print "Transient time constant can't be greater than the sustained time constant"
+        print ("Transient time constant can't be greater than the sustained time constant")
         return
 
     f = 2.0                 # Default temporal frequency in Hz
@@ -194,7 +194,7 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
     :return: a plot of the heatmap is created
     '''
     if parameter == parameter2:
-        print "Both parameters are identical - Use plot_slice() function"
+        print ("Both parameters are identical - Use plot_slice() function")
         return
 
     f = 2.0                 # Default temporal frequency in Hz
@@ -226,7 +226,7 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
         save_name = 's' + sustained_type + 't' + transient_type + 'DeltaTau_vs'
         label_extent = [1000 * (min(param2_range) - tau_transient), 1000 * (max(param2_range) - tau_transient)]
     else:
-        print "Invalid parameter given. Please choose 'd', 'SF', 'TF', or 'tau_sustained'."
+        print ("Invalid parameter given. Please choose 'd', 'SF', 'TF', or 'tau_sustained'.")
         return
 
     if parameter2 =='TF':
@@ -246,7 +246,7 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
         label_extent.append(max(param2_range))
     elif parameter2 == 'tau_sustained':
         if tau_transient > np.min(param2_range):
-            print "Transient time constant can't be greater than the minimum sustained time constant"
+            print ("Transient time constant can't be greater than the minimum sustained time constant")
             return
         ylabel = 'Delta Tau (milliseconds)'
         save_name += '_DeltaTau_heatmap'
@@ -254,7 +254,7 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
         label_extent.append(1000 * (max(param2_range) - tau_transient))
 
     else:
-        print "Invalid parameter2 given. Please choose 'd', 'SF', 'TF', or 'tau_sustained'."
+        print ("Invalid parameter2 given. Please choose 'd', 'SF', 'TF', or 'tau_sustained'.")
         return
 
     if cat:
@@ -330,14 +330,14 @@ def plot_filters(tau_list = [0.15, 0.03], totaltime = 0.3, filter_type = 'ON'):
     elif filter_type == 'OFF':
         scale_factor = -1.0
     else:
-        print "filter_types can only be ON or OFF - can't plot filter"
+        print ("filter_types can only be ON or OFF - can't plot filter")
         return
 
     colors = ['royalblue', 'orange']
     for i, tau in enumerate(tau_list):
         filter = np.zeros(len(time))
         filter[:int(tau / tstep)] = scale_factor
-        print 'tau: ', tau
+        print ('tau: ', tau)
         plt.plot(time, filter, lw = 5, c = colors[i%2])
 
     plt.xlabel('Tau (Seconds)')
@@ -376,7 +376,7 @@ if __name__ == "__main__":
 
 
             # # ####### Plots for SF
-            k_range = np.arange(0.005, 0.8, 0.005)#0.005)
+            k_range = np.arange(0.005, 1.5, 0.005)#0.005)
             plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)
             plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)
             plot_slice('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True)
