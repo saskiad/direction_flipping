@@ -2,18 +2,18 @@ import numpy as np
 from matplotlib import pyplot as plt
 import matplotlib.pylab as pylab
 
-params = {'legend.fontsize': 25,
-          'axes.labelsize':  25,
-          'axes.titlesize':  25,
-          'xtick.labelsize': 25,
-          'ytick.labelsize': 25}
+params = {'legend.fontsize': 15,
+          'axes.labelsize':  15,
+          'axes.titlesize':  15,
+          'xtick.labelsize': 15,
+          'ytick.labelsize': 15}
 
 pylab.rcParams.update(params)
 
 def calculate_DSI(f, k, delt,
                   total_time, tstep,
                   sustained_type, transient_type, tau_sustained, tau_transient,
-                  filter = 'default', plot = False):
+                  filter = 'default', plot = False, ax = None):
     '''
     This function calculated the DSI to remove the double use of code in
     the two functions below of plot_slice and plot_heatmap. Will need
@@ -82,19 +82,25 @@ def calculate_DSI(f, k, delt,
         convolved2 /= np.max(convolved2)
 
         if plot:
+            ref_dict = {
+                0.025: 0,
+                0.1: 1,
+                0.175: 2,
+            }
             if degree == 0:
-                fig, ax = plt.figure(figsize=(10,10))
-                plt.subplots(1,2)
                 time_plot = np.arange(0, 2/f, tstep)
-            ax[j].plot(time_plot, convolved1[:len(time_plot)], label='Sustained')
-            ax[j].plot(time_plot, convolved2[:len(time_plot)], label='Transient')
-            ax[j].plot(time_plot, convolved1[:len(time_plot)] + convolved2[:len(time_plot)], label = 'Sum', lw = 3)
-            ax[j].set_xlabel('Time (Seconds)')
-            ax[j].set_ylabel('Response Amplitude (Arb. U.)')
+            ax[j,ref_dict[k]].plot(time_plot, convolved1[:len(time_plot)], label='Sustained', alpha = 1)
+            ax[j,ref_dict[k]].plot(time_plot, convolved2[:len(time_plot)], label='Transient', alpha = 1)
+            ax[j,ref_dict[k]].plot(time_plot, convolved1[:len(time_plot)] + convolved2[:len(time_plot)], label = 'Sum', lw = 3, alpha = 0.5)
+
+            if ref_dict[k] == 0:
+                ax[j,ref_dict[k]].set_ylabel('Response (Arb. U.)')
+            if degree == 180:
+                ax[j, ref_dict[k]].set_xlabel('Time (Seconds)')
             # plt.xlim(0, np.max(time_plot) * 2.5)
             # plt.legend()
             # plt.title('f = ' + str(f) + ' for ' + str(degree))
-            plt.savefig('f = ' + str(int(f)) + '-' + str(int(10*(f - np.floor(f)))) + ' for ' + str(int(degree)))
+            plt.savefig('k = ' + str(int(k*1000)))
 
         # threshold = 20.
         sum_filters = convolved2 + convolved1
@@ -151,6 +157,9 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
 
     DSI = np.zeros(len(param_range))              # DSI array to save all DSI values
 
+    # Use this for time-plots (sinusoids)
+    # fig, ax = plt.subplots(2, 3, figsize=(16, 8), sharey= True, sharex=True)
+
     for i, p in enumerate(param_range):
         if parameter == 'TF':
             f = p
@@ -162,7 +171,7 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
         DSI[i] = calculate_DSI(f, k, delt,
                       total_time, tstep,
                       sustained_type, transient_type,
-                      tau_sustained, tau_transient)
+                      tau_sustained, tau_transient)#, ax = ax) Send ax for time-domain plots
 
     plt.figure(figsize=(11,11))
     plt.plot(param_range, DSI, c = 'royalblue', lw = 5.0)
@@ -370,17 +379,17 @@ if __name__ == "__main__":
     for sus in ['ON']:
         for tr in ['OFF']:
             ##### Plots for TF
-            f_range = np.arange(0.0, 25., .1)#0.1)
-            # plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True, cat = False)
-            # plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True, cat = False)
+            f_range = np.arange(0.0, 25., 3)#0.1)
+            plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True, cat = False)
+            plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True, cat = False)
 
 
             # # ####### Plots for SF
-            k_range = np.arange(0.005, 1.5, 0.005)#0.005)
+            k_range = np.arange(0.005, 1.5, 0.25)#0.005)
             plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)
             plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)
-            plot_slice('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True)
-            plot_heatmap('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True)
+            # plot_slice('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True)
+            # plot_heatmap('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True)
             #
             # ####### Plots for filter separation
             # d_range = np.arange(0., 80., 1)#1)
