@@ -32,3 +32,18 @@ RL = np.array(cre_DF.percent)[cre_DF.area == 'VISrl']
 
 print ("Areas:")
 print (stats.f_oneway(AM, AL, P, L, PM, RL))
+
+import statsmodels.api as sm
+from statsmodels.formula.api import ols
+
+mod = ols('percent ~ cre',
+          data=cre_DF).fit()
+
+aov_table = sm.stats.anova_lm(mod, typ=2)
+print(aov_table)
+
+mod = ols('percent ~ area',
+          data=cre_DF).fit()
+
+aov_table = sm.stats.anova_lm(mod, typ=2)
+print(aov_table)
