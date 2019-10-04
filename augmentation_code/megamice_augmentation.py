@@ -58,18 +58,18 @@ boc = BrainObservatoryCache(manifest_file=manifest_file)
 
 
 # base path
-path = home + "/programs/braintv/workgroups/nc-ophys/Iman/direction_flipping/stimulus_classification/"
+path = home + "/programs/braintv/workgroups/nc-ophys/Iman/direction_flipping/"
 
 # load in sessions with >4 drns under the bootstrap and dsi>.3 criteria
-sessions = np.load(path + "drn4bs_sessions.npy")
+sessions = np.load(path + "resources/drn4bs_sessions.npy")
 
 # load soulmate data
-sessions_soulmates = np.load(path + "/results/matchmaker/sessions.npy")
-drn_soulmates = np.load(path + "/results/matchmaker/drns.npy", allow_pickle=True)
-dsn_soulmates = np.load(path + "/results/matchmaker/soulmates.npy", allow_pickle=True)
+sessions_soulmates = np.load(path + "/drn_analog_code/sessions.npy")
+drn_soulmates = np.load(path + "/drn_analog_code/drns.npy", allow_pickle=True)
+dsn_soulmates = np.load(path + "/drn_analog_code/soulmates.npy", allow_pickle=True)
 
 csv = pd.read_csv(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-                "direction_flipping/stimulus_classification/dgtf_events_all_bootstrap.csv") 
+                "direction_flipping/resources/dgtf_events_all_bootstrap.csv") 
 cell_id_key = csv['cell_specimen_id']
 is_drn_key = csv['is_drn']
 
@@ -78,12 +78,12 @@ tfs = np.array([1,2,4,8,15])
 
 # load in augmented data sets
 print "Loading augmented data"
-aug_Xdrn = pd.read_csv(path + "results/megamice_augmentation/augmented_data/aug_Xdrn.csv")
-aug_Xdsn = pd.read_csv(path + "results/megamice_augmentation/augmented_data/aug_Xdsn.csv")
-tf_check = np.load(path + "results/megamice_augmentation/augmented_data/tf_check.npy")
-permutations = np.load(path + "results/megamice_augmentation/augmented_data/permutations.npy")
-y_check = np.load(path + "results/megamice_augmentation/augmented_data/y_check.npy")
-agg_cells = np.load(path + "results/megamice_augmentation/augmented_data/agg_cells.npy")
+aug_Xdrn = pd.read_csv(path + "augmentation_code/augmented_data/aug_Xdrn.csv")
+aug_Xdsn = pd.read_csv(path + "augmentation_code/augmented_data/aug_Xdsn.csv")
+tf_check = np.load(path + "augmentation_code/augmented_data/tf_check.npy")
+permutations = np.load(path + "augmentation_code/augmented_data/permutations.npy")
+y_check = np.load(path + "augmentation_code/augmented_data/y_check.npy")
+agg_cells = np.load(path + "augmentation_code/augmented_data/agg_cells.npy")
 print "Done"
 
 
@@ -169,7 +169,7 @@ def classification_main(mouse_size, n_mice, stride, save_suffix):
                     results[mi,pi,ni,m,1] = test_acc            
 
 
-    np.save(path + "results/megamice_augmentation/" + "megamice_results" + str(mouse_size) + save_suffix + ".npy", results)
+    np.save(path + "augmentation_code/results/" + "megamice_results" + str(mouse_size) + save_suffix + ".npy", results)
 
 
 def main():

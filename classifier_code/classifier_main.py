@@ -52,7 +52,7 @@ save_path = home + "/programs/braintv/workgroups/cortexmodels/michaelbu/" + \
 manifest_file = home + "/programs/braintv/workgroups/cortexmodels/michaelbu/"+\
     "ObservatoryPlatformPaperAnalysis/platform_boc_2018_09_25/manifest.json"
 
-pickle_path = home + "/programs/braintv/workgroups/nc-ophys/Iman/direction_flipping/stimulus_classification/pickle_jar/"
+# pickle_path = home + "/programs/braintv/workgroups/nc-ophys/Iman/direction_flipping/stimulus_classification/pickle_jar/"
 # retrieve data cache
 boc = BrainObservatoryCache(manifest_file=manifest_file)
 
@@ -93,19 +93,20 @@ def classification( session_id, methods, N_iter, use_events,
     if bootstrap_drns:
         if dsi25:
             csv = pd.read_csv(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-                "direction_flipping/stimulus_classification/dgtf_events_all_bootstrap_dsi25.csv") 
+                "direction_flipping/resources/dgtf_events_all_bootstrap_dsi25.csv") 
             cell_id_key = csv['cell_specimen_id']
             is_drn_key = csv['is_drn']
             # dir_key = csv['pref_dir']
         else:
             csv = pd.read_csv(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-                "direction_flipping/stimulus_classification/dgtf_events_all_bootstrap.csv") 
+                "direction_flipping/resources/dgtf_events_all_bootstrap.csv") 
             cell_id_key = csv['cell_specimen_id']
             is_drn_key = csv['is_drn']
+            is_dsn_key = csv['is_dsn']
             # dir_key = csv['pref_dir']
     else:
         csv = pd.read_csv(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-            "direction_flipping/stimulus_classification/dgtf_events_all.csv") 
+            "direction_flipping/resources/dgtf_events_all.csv") 
         cell_id_key = csv['cell_specimen_id']
         is_drn_key = csv['DRN']
         # dir_key = csv['pref_dir']
@@ -234,10 +235,10 @@ def classification( session_id, methods, N_iter, use_events,
         else:
             rset = "random_set_dsi3"
         random_drns = np.load(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-            "direction_flipping/stimulus_classification/results/random/" + rset + "/random_drns_" + \
+            "direction_flipping/resources/random/" + rset + "/random_drns_" + \
             str(session_id) + ".npy").astype(int)
         random_nondrns = np.load(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-            "direction_flipping/stimulus_classification/results/random/" + rset + "/random_nondrns_" + \
+            "direction_flipping/resources/random/" + rset + "/random_nondrns_" + \
             str(session_id) + ".npy").astype(int)
 
     train_accs = np.zeros((N_iter, N_drns+1, len(methods)))
@@ -289,10 +290,10 @@ def classification( session_id, methods, N_iter, use_events,
         else:
             rset = "random_set_dsi3"
         np.save(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-            "direction_flipping/stimulus_classification/results/random/" + rset + "/random_drns_" + \
+            "direction_flipping/resources/random/" + rset + "/random_drns_" + \
             str(session_id) + ".npy", random_drns)
         np.save(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-            "direction_flipping/stimulus_classification/results/random/" + rset + "/random_nondrns_" + \
+            "direction_flipping/resources/random/" + rset + "/random_nondrns_" + \
             str(session_id) + ".npy", random_nondrns)
     
     if generate_plots:
@@ -316,7 +317,7 @@ def classification( session_id, methods, N_iter, use_events,
         plt.ylabel("Accuracy")
         plt.ylim(-.03,.03)
         plt.savefig(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-            "direction_flipping/stimulus_classification/figures/" + folder + \
+            "direction_flipping/classification_code/figures/" + folder + \
             "/" + series + "/demeaned_accuracies_session" + str(session_id))
         
 
@@ -332,7 +333,7 @@ def classification( session_id, methods, N_iter, use_events,
         plt.xlabel("% DRNs")
         plt.ylabel("Accuracy")
         plt.savefig(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-            "direction_flipping/stimulus_classification/figures/" + folder + \
+            "direction_flipping/classification_code/figures/" + folder + \
             "/" + series + "/accuracies_session" + str(session_id))
 
     return(x, test_accs, train_accs)
@@ -687,7 +688,7 @@ def main():
                 folder=folder, series=series, generate_random=generate_random, dsi25=dsi25)
 
     fp = home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-        "direction_flipping/stimulus_classification/results/"
+        "direction_flipping/classification_code/results/"
     fn = fp + folder + "/" + series + "/accuracies_session" + str(session_id)
     np.save(fn, xaccs)
     fn_key = fp + folder + "/" + series + "/methods_session" + str(session_id)

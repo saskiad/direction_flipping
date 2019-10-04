@@ -34,8 +34,10 @@ from sklearn.ensemble import RandomForestClassifier
 # got these from here: https://github.com/AllenInstitute/ ...
 # visual_coding_2p_analysis/blob/master/visual_coding_2p_analysis/core.py
 
-# home = "/allen" 
-home = "/Volumes"
+if sys.platform == "darwin":
+    home = "/Volumes"
+else:
+    home = "/allen"
 
 save_path = home + "/programs/braintv/workgroups/cortexmodels/michaelbu/" + \
     "ObservatoryPlatformPaperAnalysis/event_analysis_files_2018_09_25" 
@@ -47,11 +49,12 @@ boc = BrainObservatoryCache(manifest_file=manifest_file)
 
 # set to false if using drn-criteria defined drns instead
 bootstrap_drns = True
+dsi25 = False
 
-path = home + "/programs/braintv/workgroups/nc-ophys/Iman/direction_flipping/stimulus_classification/"
-sessions = np.load(path + "/results/matchmaker/sessions.npy")
-drn_soulmates = np.load(path + "/results/matchmaker/drns.npy")
-dsn_soulmates = np.load(path + "/results/matchmaker/soulmates.npy")
+path = home + "/programs/braintv/workgroups/nc-ophys/Iman/direction_flipping/"
+sessions = np.load(path + "/drn_analog_code/sessions.npy")
+drn_soulmates = np.load(path + "/drn_analog_code/drns.npy")
+dsn_soulmates = np.load(path + "/drn_analog_code/soulmates.npy")
 
 # For a given session id, this function calls the specified classifier(s)
 # with an incrementally increasing number of DRNs and plots the
@@ -77,19 +80,25 @@ def classification( session_id, methods, use_events,
 
     # load in csv data
     if bootstrap_drns:
-        csv = pd.read_csv(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-            "direction_flipping/stimulus_classification/dgtf_events_all_bootstrap.csv") 
-        cell_id_key = csv['cell_specimen_id']
-        is_drn_key = csv['is_drn']
-        is_dsn_key = csv['is_dsn']
-        dir_key = csv['pref_dir']
+        if dsi25:
+            csv = pd.read_csv(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
+                "direction_flipping/resources/dgtf_events_all_bootstrap_dsi25.csv") 
+            cell_id_key = csv['cell_specimen_id']
+            is_drn_key = csv['is_drn']
+            # dir_key = csv['pref_dir']
+        else:
+            csv = pd.read_csv(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
+                "direction_flipping/resources/dgtf_events_all_bootstrap.csv") 
+            cell_id_key = csv['cell_specimen_id']
+            is_drn_key = csv['is_drn']
+            is_dsn_key = csv['is_dsn']
+            # dir_key = csv['pref_dir']
     else:
         csv = pd.read_csv(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-            "direction_flipping/stimulus_classification/dgtf_events_all.csv") 
+            "direction_flipping/resources/dgtf_events_all.csv") 
         cell_id_key = csv['cell_specimen_id']
         is_drn_key = csv['DRN']
-        is_dsn_key = csv['DSI_pref_tf']>0.4
-        dir_key = csv['pref_dir']
+        # dir_key = csv['pref_dir']
 
     # load cell ids for this session
     data_set = boc.get_ophys_experiment_data(session_id)
@@ -269,7 +278,7 @@ def main():
                 folder=folder, series=series)
 
     fp = home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-        "direction_flipping/stimulus_classification/results/"
+        "direction_flipping/classifier_code/results/"
     fn = fp + folder + "/" + series + "/accuracies_session" + str(session_id)
     np.save(fn, xaccs)
     fn_key = fp + folder + "/" + series + "/methods_session" + str(session_id)

@@ -34,8 +34,10 @@ from sklearn.ensemble import RandomForestClassifier
 # got these from here: https://github.com/AllenInstitute/ ...
 # visual_coding_2p_analysis/blob/master/visual_coding_2p_analysis/core.py
 
-home = "/allen" 
-# home = "/Volumes"
+if sys.platform == "darwin":
+    home = "/Volumes"
+else:
+    home = "/allen"
 
 save_path = home + "/programs/braintv/workgroups/cortexmodels/michaelbu/" + \
     "ObservatoryPlatformPaperAnalysis/event_analysis_files_2018_09_25" 
@@ -75,20 +77,20 @@ def classification( session_id, methods, N_iter, use_events,
     if bootstrap_drns:
         if dsi25:
             csv = pd.read_csv(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-                "direction_flipping/stimulus_classification/dgtf_events_all_bootstrap_dsi25.csv") 
+                "direction_flipping/resources/dgtf_events_all_bootstrap_dsi25.csv") 
             cell_id_key = csv['cell_specimen_id']
             is_drn_key = csv['is_drn']
             # dir_key = csv['pref_dir']
         else:
             csv = pd.read_csv(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-                "direction_flipping/stimulus_classification/dgtf_events_all_bootstrap.csv") 
+                "direction_flipping/resources/dgtf_events_all_bootstrap.csv") 
             cell_id_key = csv['cell_specimen_id']
             is_drn_key = csv['is_drn']
             is_dsn_key = csv['is_dsn']
             # dir_key = csv['pref_dir']
     else:
         csv = pd.read_csv(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-            "direction_flipping/stimulus_classification/dgtf_events_all.csv") 
+            "direction_flipping/resources/dgtf_events_all.csv") 
         cell_id_key = csv['cell_specimen_id']
         is_drn_key = csv['DRN']
         # dir_key = csv['pref_dir']
@@ -218,7 +220,7 @@ def classification( session_id, methods, N_iter, use_events,
             plt.ylabel("Accuracy")
             plt.ylim(-.03,.03)
             plt.savefig(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-                "direction_flipping/stimulus_classification/figures/" + folder + \
+                "direction_flipping/classification_code/figures/" + folder + \
                 "/" + series + "/demeaned_accuracies_" + str(method) + "_session" + str(session_id))
             # plt.show()
         
@@ -234,7 +236,7 @@ def classification( session_id, methods, N_iter, use_events,
             plt.xlabel("% DRNs")
             plt.ylabel("Accuracy")
             plt.savefig(home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-                "direction_flipping/stimulus_classification/figures/" + folder + \
+                "direction_flipping/classification_code/figures/" + folder + \
                 "/" + series + "/accuracies_" + str(method) + "_session" + str(session_id))
             # plt.show()
 
@@ -303,7 +305,7 @@ def main():
                 folder=folder, series=series)
 
     fp = home + "/programs/braintv/workgroups/nc-ophys/Iman/" + \
-        "direction_flipping/stimulus_classification/results/"
+        "direction_flipping/classification_code/results/"
     fn = fp + folder + "/" + series + "/accuracies_session" + str(session_id)
     np.save(fn, xaccs)
     fn_key = fp + folder + "/" + series + "/methods_session" + str(session_id)
