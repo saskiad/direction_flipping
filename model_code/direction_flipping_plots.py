@@ -173,19 +173,19 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
                       sustained_type, transient_type,
                       tau_sustained, tau_transient)#, ax = ax) Send ax for time-domain plots
 
-    # if ax == None:
-    #     plt.figure(figsize=(11,11))
-    #     plt.plot(param_range, DSI, c = 'royalblue', lw = 5.0)
-    #     plt.plot([np.min(param_range), np.max(param_range)], [0, 0], 'k', lw = 1.75)
-    #     plt.ylabel('DSI (unitless)')
-    #     plt.xlabel(xlabel)
-    #     plt.title('s' + sustained_type + 't' + transient_type)
-    #     plt.ylim(-1, 1)
-    #     if save_flag:
-    #         plt.savefig(save_name + '.png')
-    if True:
-        ax[0].plot(param_range, DSI, c = 'royalblue', lw = 5.0)
-        ax[0].set_ylim(-1, 1)
+    if ax == None:
+        plt.figure(figsize=(11,11))
+        plt.plot(param_range, DSI, c = 'royalblue', lw = 5.0)
+        plt.plot([np.min(param_range), np.max(param_range)], [0, 0], 'k', lw = 1.75)
+        plt.ylabel('DSI (unitless)')
+        plt.xlabel(xlabel)
+        plt.title('s' + sustained_type + 't' + transient_type)
+        plt.ylim(-1, 1)
+        if save_flag:
+            plt.savefig(save_name + '.png')
+    # if True:
+    #     ax[0].plot(param_range, DSI, c = 'royalblue', lw = 5.0)
+    #     ax[0].set_ylim(-1, 1)
 
     return
 
@@ -301,45 +301,45 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
                                                                      sustained_type, transient_type,
                                                                      tau_sustained, tau_transient)
 
-    # if ax == None:
-    #     plt.figure(figsize=(12,12))
-    #     plt.imshow(np.transpose(DSI),
-    #                interpolation=None,
-    #                cmap='seismic',
-    #                extent=label_extent,
-    #                vmin = -1, vmax = 1,
-    #                aspect='auto')
-    #     # np.save('TF_heatmap.npy', np.transpose(DSI))
-    #     plt.ylabel(ylabel)
-    #     plt.xlabel(xlabel)
-    #     plt.title('s' + sustained_type + 't' + transient_type)
-    #     plt.colorbar(ticks= [-1, 0, 1])
-    #     if parameter2 == 'tau_sustained' and not cat:
-    #         plt.plot([np.min(param_range), np.max(param_range)], [120, 120], c = 'k', lw = 5.)
-    #     elif parameter2 == 'tau_sustained' and cat:
-    #         plt.plot([np.min(param_range), np.max(param_range)], [10, 10], c='k', lw = 5.)
-    #
-    #     # plt.grid(alpha = 0.5)
-    #
-    #     if save_flag:
-    #         plt.savefig(save_name + '.png')
-    #
-    #     plt.show()
-    if True:
-        ax[1].imshow(np.transpose(DSI),
+    if ax == None:
+        plt.figure(figsize=(12,12))
+        plt.imshow(np.transpose(DSI),
                    interpolation=None,
                    cmap='seismic',
                    extent=label_extent,
                    vmin = -1, vmax = 1,
                    aspect='auto')
-
-        # ax[1].set_ylabel(ylabel)
-        # ax[1].set_xlabel(xlabel)
-        # plt.title('s' + sustained_type + 't' + transient_type)
+        # np.save('TF_heatmap.npy', np.transpose(DSI))
+        plt.ylabel(ylabel)
+        plt.xlabel(xlabel)
+        plt.title('s' + sustained_type + 't' + transient_type)
+        plt.colorbar(ticks= [-1, 0, 1])
         if parameter2 == 'tau_sustained' and not cat:
             plt.plot([np.min(param_range), np.max(param_range)], [120, 120], c = 'k', lw = 5.)
         elif parameter2 == 'tau_sustained' and cat:
             plt.plot([np.min(param_range), np.max(param_range)], [10, 10], c='k', lw = 5.)
+
+        # plt.grid(alpha = 0.5)
+
+        if save_flag:
+            plt.savefig(save_name + '.png')
+
+        plt.show()
+    # if True:
+    #     ax[1].imshow(np.transpose(DSI),
+    #                interpolation=None,
+    #                cmap='seismic',
+    #                extent=label_extent,
+    #                vmin = -1, vmax = 1,
+    #                aspect='auto')
+    #
+    #     # ax[1].set_ylabel(ylabel)
+    #     # ax[1].set_xlabel(xlabel)
+    #     # plt.title('s' + sustained_type + 't' + transient_type)
+    #     if parameter2 == 'tau_sustained' and not cat:
+    #         plt.plot([np.min(param_range), np.max(param_range)], [120, 120], c = 'k', lw = 5.)
+    #     elif parameter2 == 'tau_sustained' and cat:
+    #         plt.plot([np.min(param_range), np.max(param_range)], [10, 10], c='k', lw = 5.)
 
 
 
@@ -397,15 +397,15 @@ if __name__ == "__main__":
     #tau_list = [0.1], totaltime = 0.8
     plot_filters()
 
-    for sus in ['ON']:
-        for tr in ['OFF']:
+    for sus in ['ON', 'OFF']:
+        for tr in ['ON', 'OFF']:
 
             ##### Plots for TF
             f_range = np.arange(0.0, 25., 0.1)#0.1)
             # fig, ax = plt.subplots(1, 2, figsize=(22, 8))
-            # plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True, cat = False, ax = ax)
-            # plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True, cat = False, ax = ax)
-            # plt.savefig('TF_plots_combined_s' + sus + '_t' + tr + '.png')
+            plot_slice('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True, cat = False)#, ax = ax)
+            plot_heatmap('TF', f_range, sustained_type=sus, transient_type = tr, save_flag = True, cat = False)#, ax = ax)
+            plt.savefig('TF_plots_combined_s' + sus + '_t' + tr + '.png')
 
             fig, ax = plt.subplots(1, 2, figsize=(22, 8))
             plot_slice('TF', f_range, sustained_type=sus, transient_type=tr, save_flag=True, cat=True, ax=ax)
@@ -414,16 +414,16 @@ if __name__ == "__main__":
 
 
             # # ####### Plots for SF
-            # k_range = np.arange(0.005, 1.5, 0.005)#0.005)
+            k_range = np.arange(0.005, 1.5, 0.005)#0.005)
             # fig, ax = plt.subplots(1, 2, figsize=(22, 8))
-            # plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True, ax = ax)
-            # plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True, ax = ax)
-            # plt.savefig('SF_plots_combined_s' + sus + '_t' + tr + '.png')
+            plot_slice('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)#, ax = ax)
+            plot_heatmap('SF', k_range, sustained_type=sus, transient_type = tr, save_flag = True)#, ax = ax)
+            plt.savefig('SF_plots_combined_s' + sus + '_t' + tr + '.png')
 
-            # fig, ax = plt.subplots(1, 2, figsize=(22, 8))
-            # plot_slice('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True, ax=ax)
-            # plot_heatmap('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True, ax=ax)
-            # plt.savefig('SF_plots_combined_s' + sus + '_t' + tr + '_cat.png')
+            fig, ax = plt.subplots(1, 2, figsize=(22, 8))
+            plot_slice('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True, ax=ax)
+            plot_heatmap('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True, ax=ax)
+            plt.savefig('SF_plots_combined_s' + sus + '_t' + tr + '_cat.png')
 
             # plot_slice('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True)
             # plot_heatmap('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True)
