@@ -425,16 +425,14 @@ if __name__ == "__main__":
             plot_heatmap('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True, ax=ax)
             plt.savefig('SF_plots_combined_s' + sus + '_t' + tr + '_cat.png')
 
-            # plot_slice('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True)
-            # plot_heatmap('SF', k_range, sustained_type=sus, transient_type=tr, save_flag=True, cat = True)
-            #
+
             # ####### Plots for filter separation
-            # d_range = np.arange(0., 80., 1)#1)
-            # plot_slice('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
-            # plot_heatmap('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
+            d_range = np.arange(0., 80., 1)#1)
+            plot_slice('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
+            plot_heatmap('d', d_range, sustained_type=sus, transient_type = tr, save_flag = False)
 
 
-            ####### TF/SF Heatmap
+            ####### Ability yo ploy TF/SF Heatmap
             # plot_heatmap('TF', f_range, parameter2 = 'SF', param2_range = k_range,
             #                                 sustained_type=sus, transient_type=tr, save_flag=False)
 
