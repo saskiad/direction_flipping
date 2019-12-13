@@ -433,15 +433,14 @@ if __name__ == "__main__":
 
 
             ####### Ability yo ploy TF/SF Heatmap
-            # plot_heatmap('TF', f_range, parameter2 = 'SF', param2_range = k_range,
-            #                                 sustained_type=sus, transient_type=tr, save_flag=False)
+            plot_heatmap('TF', f_range, parameter2 = 'SF', param2_range = k_range,
+                                            sustained_type=sus, transient_type=tr, save_flag=False)
 
 
-
-    # for f in [3.3, 8.3, 13.4]:                  # Default temporal frequency in Hz
-    #     k = 0.04                                # Defaul spatial frequency in cycles pe
-    #     delt = 5.                               # Default filter separation in degrees
-    #     tstep = 0.001
-    #     total_time = 10.0
-    #     calculate_DSI(f, k, delt, total_time, tstep, 'ON', 'OFF', 0.15, 0.03, plot = True)
+    for f in [3.3, 8.3, 13.4]:                  # Default temporal frequency in Hz
+        k = 0.04                                # Defaul spatial frequency in cycles pe
+        delt = 5.                               # Default filter separation in degrees
+        tstep = 0.001
+        total_time = 10.0
+        calculate_DSI(f, k, delt, total_time, tstep, 'ON', 'OFF', 0.15, 0.03, plot = True)
     plt.show()
