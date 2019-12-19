@@ -102,11 +102,7 @@ def calculate_DSI(f, k, delt,
             # plt.title('f = ' + str(f) + ' for ' + str(degree))
             plt.savefig('k = ' + str(int(k*1000)))
 
-        # threshold = 20.
-        sum_filters = convolved2 + convolved1
-        # sum_filters[sum_filters < threshold] = 0.
         rates[j] = np.max(convolved2 + convolved1)  # For no threshold.
-        # rates[j] = np.mean(sum_filters)
 
      # Return DSI
     return (rates[0] - rates[1]) / (rates[1] + rates[0])
@@ -157,8 +153,6 @@ def plot_slice(parameter, param_range,  tau_sustained = 0.15, tau_transient = 0.
 
     DSI = np.zeros(len(param_range))              # DSI array to save all DSI values
 
-    # Use this for time-plots (sinusoids)
-    # fig, ax = plt.subplots(2, 3, figsize=(16, 8), sharey= True, sharex=True)
 
     for i, p in enumerate(param_range):
         if parameter == 'TF':
@@ -319,8 +313,6 @@ def plot_heatmap(parameter, param_range, parameter2 = 'tau_sustained', param2_ra
         elif parameter2 == 'tau_sustained' and cat:
             plt.plot([np.min(param_range), np.max(param_range)], [10, 10], c='k', lw = 5.)
 
-        # plt.grid(alpha = 0.5)
-
         if save_flag:
             plt.savefig(save_name + '.png')
 
@@ -394,7 +386,6 @@ def plot_sustained_trasnsient_for_V1(totaltime = 0.5):
 if __name__ == "__main__":
 
      ####### Plot filter examples
-    #tau_list = [0.1], totaltime = 0.8
     plot_filters()
 
     for sus in ['ON', 'OFF']:
@@ -433,8 +424,8 @@ if __name__ == "__main__":
 
 
             ####### Ability yo ploy TF/SF Heatmap
-            plot_heatmap('TF', f_range, parameter2 = 'SF', param2_range = k_range,
-                                            sustained_type=sus, transient_type=tr, save_flag=False)
+            # plot_heatmap('TF', f_range, parameter2 = 'SF', param2_range = k_range,
+            #                                 sustained_type=sus, transient_type=tr, save_flag=False)
 
 
     for f in [3.3, 8.3, 13.4]:                  # Default temporal frequency in Hz
